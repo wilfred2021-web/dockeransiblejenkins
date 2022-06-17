@@ -1,0 +1,78 @@
+pipeline{
+    agent any
+    tools {
+      maven 'maven 3.8.5'
+    }
+    environment {
+      Docker_TAG = fetchLastCommitInfo()
+    }
+
+    stages{
+        stage('SCM'){
+            steps{
+                git credentialsId: 'github', 
+                    url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
+            }
+        }
+        
+        stage('Maven Build'){
+            steps{
+                sh "mvn clean package"
+            }
+        }
+         stage('Docker Build'){
+            steps{
+                sh "docker build . -t nrbaskar/hariapp:${Docker_TAG}"
+            }
+        }
+        stage('Dockerhub Push'){
+            steps{
+                withCredentials([string(credentialsId: 'docker-hub', variable: 'dockerHubPwd')]) {
+                    sh "docker login -u nrbaskar -p ${dockerHubPwd}"
+                }
+                
+                sh "docker push nrbaskar/hariapp:${Docker_TAG}"
+            }
+        }
+		     
+        stage('docker dev server'){
+            steps{
+                ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
+                
+            }
+        }
+		stage('docker test server'){
+            steps{
+                ansiblePlaybook credentialsId: 'testing-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'test.inv', playbook: 'deploy_test.yml'
+                
+            }
+        }
+    }
+}
+
+/** Function to fetch the last commit information*/
+def fetchLastCommitInfo(specificRevisionID) {
+    print '...........................Fetching last commit..................................'    
+    if(specificRevisionID)  specificRevisionID = specificRevisionID.trim().toString()
+    else specificRevisionID = ""
+    script{        
+        def publisher = LastChanges.getLastChangesPublisher null, "SIDE", "LINE", true, true, "", "", specificRevisionID, "", ""
+        publisher.publishLastChanges()
+        def changes = publisher.getLastChanges()
+        def commitDetails = ''
+        for (commit in changes.getCommits()) {
+            def commitInfo = commit.getCommitInfo()
+            commitDetails = commitDetails + '----------------------------------====CommitID: '+commitInfo.getCommitId()+' ============------------------------------<br/>'
+            commitDetails = commitDetails + 'Committed By: <b>'+commitInfo.getCommitterName()+'('+commitInfo.getCommitterEmail()+')</b><br/>'
+            commitDetails = commitDetails + 'Committed On: <b>'+commitInfo.getCommitDate()+'</b><br/>'
+            commitDetails = commitDetails + 'Committed Message: <b>'+commitInfo.getCommitMessage()+'</b><br/>'
+            commitDetails = commitDetails + '----------------------------------=====================------------------------------<br/>'
+            print(commitInfo)
+            print '........----------------====================-------------------...........'
+
+        }
+        def diff = publisher.getDiff()
+        writeFile file: 'build.diff', text: diff    
+        return commitDetails;
+    }
+}
