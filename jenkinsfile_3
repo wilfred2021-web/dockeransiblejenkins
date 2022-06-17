@@ -52,6 +52,7 @@ pipeline{
 
 /** Function to fetch the last commit information*/
 def fetchLastCommitInfo(specificRevisionID) {
+sh "yum install git"
     print '...........................Fetching last commit..................................'    
     if(specificRevisionID)  specificRevisionID = specificRevisionID.trim().toString()
     else specificRevisionID = ""
