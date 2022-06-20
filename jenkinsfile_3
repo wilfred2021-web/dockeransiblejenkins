@@ -38,12 +38,13 @@ pipeline{
         stage('docker dev server'){
             steps{
                 script {
-               if (ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml') 
+               if (currentBuild.result == 'SUCCESS') 
                    {
-	           echo 'Hello from currentBuild is SUCCESS'
+				    ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
+                    echo 'Hello from currentBuild is failed'
                }
-               else (currentBuild.result: SUCCESS == FAILED) {
-                  sh " echo 'Hello from currentBuild is FAILED'"
+               else {
+                  sh " echo 'Hello from currentBuild is passed'"
 }
    }
             }
