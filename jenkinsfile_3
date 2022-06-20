@@ -1,8 +1,6 @@
 pipeline{
     agent any
-    tools {
-      maven 'maven 3.8.5'
-    }
+   
     environment {
       Docker_TAG = getversion()
     }
@@ -35,16 +33,16 @@ pipeline{
             }
         }
 		     
-        stage('docker dev server'){
+         stage('docker dev server'){
             steps{
-	    
-	      script {
-               if (currentBuild.result == 'SUCCESS') {
-	       ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
-	       	             echo 'currentBuild is PASSED'
-			                    }
-	       else {
-                  sh " echo 'currentBuild is FAILED'"
+                ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
+                script {
+               if (currentBuild.result == 'SUCCESS') 
+                   {
+                    echo 'Hello from currentBuild is Passed'
+               }
+               else {
+                  sh " echo 'Hello from currentBuild is Failed'"
 }
    }
             }
