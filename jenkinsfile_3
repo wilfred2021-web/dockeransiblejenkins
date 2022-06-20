@@ -43,7 +43,7 @@ pipeline{
 	            
                     echo 'Hello from currentBuild is passed'
                }
-               else {
+               else if {
                   sh " echo 'Hello from currentBuild is Failed'"
 }
    }
