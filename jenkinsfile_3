@@ -41,10 +41,10 @@ pipeline{
                 script {
                if (currentBuild.result == 'SUCCESS') 
                    {
-                    echo 'Hello from currentBuild is FAILURE'
+                    echo 'currentBuild is PASSED'
                }
                else {
-                  sh " echo 'Hello from currentBuild is PASSED'"
+                  sh " echo 'currentBuild is FAILURE'"
 }
    }
             }
