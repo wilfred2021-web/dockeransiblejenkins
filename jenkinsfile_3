@@ -4,7 +4,7 @@ pipeline{
       maven 'maven 3.8.5'
     }
     environment {
-      Docker_TAG = fetchLastCommitInfo()
+      Docker_TAG = getversion()
     }
 
     stages{
@@ -38,9 +38,18 @@ pipeline{
         stage('docker dev server'){
             steps{
                 ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
-                
+                script {
+               if (currentBuild.result == 'SUCCESS') 
+                   {
+                    echo 'Hello from currentBuild is FAILURE'
+               }
+               else {
+                  sh " echo 'Hello from currentBuild is PASSED'"
+}
+   }
             }
         }
+		
 		stage('docker test server'){
             steps{
                 ansiblePlaybook credentialsId: 'testing-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'test.inv', playbook: 'deploy_test.yml'
@@ -50,30 +59,8 @@ pipeline{
     }
 }
 
-/** Function to fetch the last commit information*/
-def fetchLastCommitInfo(specificRevisionID) {
-sh "yum install git"
-    print '...........................Fetching last commit..................................'    
-    if(specificRevisionID)  specificRevisionID = specificRevisionID.trim().toString()
-    else specificRevisionID = ""
-    script{        
-        def publisher = LastChanges.getLastChangesPublisher null, "SIDE", "LINE", true, true, "", "", specificRevisionID, "", ""
-        publisher.publishLastChanges()
-        def changes = publisher.getLastChanges()
-        def commitDetails = ''
-        for (commit in changes.getCommits()) {
-            def commitInfo = commit.getCommitInfo()
-            commitDetails = commitDetails + '----------------------------------====CommitID: '+commitInfo.getCommitId()+' ============------------------------------<br/>'
-            commitDetails = commitDetails + 'Committed By: <b>'+commitInfo.getCommitterName()+'('+commitInfo.getCommitterEmail()+')</b><br/>'
-            commitDetails = commitDetails + 'Committed On: <b>'+commitInfo.getCommitDate()+'</b><br/>'
-            commitDetails = commitDetails + 'Committed Message: <b>'+commitInfo.getCommitMessage()+'</b><br/>'
-            commitDetails = commitDetails + '----------------------------------=====================------------------------------<br/>'
-            print(commitInfo)
-            print '........----------------====================-------------------...........'
-
-        }
-        def diff = publisher.getDiff()
-        writeFile file: 'build.diff', text: diff    
-        return commitDetails;
-    }
+def getversion(){
+    def commithash = sh label: '', returnStdout: true, script: 'git rev-parse --short HEAD'
+    return commithash
+    
 }
