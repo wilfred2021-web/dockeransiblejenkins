@@ -37,9 +37,10 @@ pipeline{
 		     
         stage('docker dev server'){
             steps{
-	    ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
+	    
 	      script {
                if (currentBuild.result == 'SUCCESS') {
+	       ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
 	       	             echo 'currentBuild is PASSED'
                }
 	       else if (currentBuild.result == 'Rejected') {
