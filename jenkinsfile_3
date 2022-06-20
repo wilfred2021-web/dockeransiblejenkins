@@ -42,7 +42,7 @@ pipeline{
 	       ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
 	             echo 'Hello from currentBuild is PASSED'
                }
-               else (currentBuild.result == 'FAILED') {
+               else {
                   sh " echo 'Hello from currentBuild is FAILED'"
 }
    }
