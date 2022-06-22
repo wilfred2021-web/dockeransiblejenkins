@@ -13,7 +13,7 @@ pipeline{
                 git credentialsId: 'github', 
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
             }
-			
+		}
 			stage("last-changes") {
         def publisher = LastChanges.getLastChangesPublisher "LAST_SUCCESSFUL_BUILD", "SIDE", "LINE", true, true, "", "", "", "", ""
               publisher.publishLastChanges()
@@ -29,8 +29,10 @@ pipeline{
             }
 
         }
-    }		
-	        stage('Maven Build'){
+    
+		
+	   
+        stage('Maven Build'){
             steps{
                 sh "mvn clean package"
             }
