@@ -8,16 +8,15 @@ pipeline{
     }
 
     stages{
-        stage('SCM'){
+        stage("checkout"){
             
                 git credentialsId: 'github', 
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
-            
+                
 		}
-			script{
+			stage("last-changes"){
         def publisher = LastChanges.getLastChangesPublisher "LAST_SUCCESSFUL_BUILD", "SIDE", "LINE", true, true, "", "", "", "", ""
-        def publisher = LastChanges.getLastChangesPublisher null, "SIDE", "LINE", true, true, "", "", specificRevisionID, "", ""        
-		publisher.publishLastChanges()
+            publisher.publishLastChanges()
               def changes = publisher.getLastChanges()
               println(changes.getEscapedDiff())
               for (commit in changes.getCommits()) {
