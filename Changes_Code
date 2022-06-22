@@ -1,11 +1,10 @@
-import groovy.transform.Field
-@Field
 node {
       stage("checkout") {
         git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
       }
-
+import groovy.transform.Field
       stage("last-changes") {
+      @Field
       def publisher = LastChanges.getLastChangesPublisher null, "SIDE", "LINE", true, true, "", "", specificRevisionID, "", ""
               def changes = publisher.getLastChanges()
               println(changes.getEscapedDiff())
