@@ -11,24 +11,8 @@ pipeline{
         stage('SCM'){
                     git credentialsId: 'github', 
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
-		          
-             stage("last-changes") {
-        def publisher = LastChanges.getLastChangesPublisher "LAST_SUCCESSFUL_BUILD", "SIDE", "LINE", true, true, "", "", "", "", ""
-              publisher.publishLastChanges()
-              def changes = publisher.getLastChanges()
-              println(changes.getEscapedDiff())
-              for (commit in changes.getCommits()) {
-                  println(commit)
-                  def commitInfo = commit.getCommitInfo()
-                  println(commitInfo)
-                  println(commitInfo.getCommitMessage())
-                  println(commit.getChanges())
                 }
-            }
-
-        }
-    }
-        
+			       
         stage('Maven Build'){
             steps{
                 sh "mvn clean package"
@@ -48,6 +32,22 @@ pipeline{
                 sh "docker push nrbaskar/hariapp:${Docker_TAG}"
             }
         }
+		stage("last-changes") {
+        def publisher = LastChanges.getLastChangesPublisher "LAST_SUCCESSFUL_BUILD", "SIDE", "LINE", true, true, "", "", "", "", ""
+              publisher.publishLastChanges()
+              def changes = publisher.getLastChanges()
+              println(changes.getEscapedDiff())
+              for (commit in changes.getCommits()) {
+                  println(commit)
+                  def commitInfo = commit.getCommitInfo()
+                  println(commitInfo)
+                  println(commitInfo.getCommitMessage())
+                  println(commit.getChanges())
+                }
+            }
+
+        }
+    }
 		     
         stage('docker dev server'){
             steps{
