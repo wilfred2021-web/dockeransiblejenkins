@@ -1,7 +1,7 @@
 pipeline {
     agent any
       stages{
-      stage("checkout") {
+      steps("checkout") {
         git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
       }
       stage("last-changes") {
