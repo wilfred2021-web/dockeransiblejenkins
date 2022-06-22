@@ -12,9 +12,7 @@ pipeline{
             
                 git credentialsId: 'github', 
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
-                
-		}
-	script{
+		    script{
         def publisher = LastChanges.getLastChangesPublisher "LAST_SUCCESSFUL_BUILD", "SIDE", "LINE", true, true, "", "", "", "", ""
             publisher.publishLastChanges()
               def changes = publisher.getLastChanges()
@@ -29,6 +27,9 @@ pipeline{
             }
 
         }
+                
+		}
+	
     
 		
 	   
