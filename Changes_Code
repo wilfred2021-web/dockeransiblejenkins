@@ -5,7 +5,7 @@ pipeline {
         git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
       }
       stage("last-changes") {
-      def publisher = LastChanges.getLastChangesPublisher null, "SIDE", "LINE", true, true, "", "", specificRevisionID, "", ""
+      def publisher = LastChanges.getLastChangesPublisher "LAST_SUCCESSFUL_BUILD", "SIDE", "LINE", true, true, "", "", "", "", ""
               def changes = publisher.getLastChanges()
               println(changes.getEscapedDiff())
               for (commit in changes.getCommits()) {
