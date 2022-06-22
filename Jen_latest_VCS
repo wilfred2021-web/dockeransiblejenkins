@@ -14,7 +14,7 @@ pipeline{
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
             }
 		}
-			script{
+	steps{
         def publisher = LastChanges.getLastChangesPublisher "LAST_SUCCESSFUL_BUILD", "SIDE", "LINE", true, true, "", "", "", "", ""
         def publisher = LastChanges.getLastChangesPublisher null, "SIDE", "LINE", true, true, "", "", specificRevisionID, "", ""        
 		publisher.publishLastChanges()
