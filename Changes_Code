@@ -6,15 +6,12 @@ pipeline{
     environment {
       Docker_TAG = getversion()
     }
-
     stages{
         stage('SCM'){
                     git credentialsId: 'github', 
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
-                }
-			
-        
-        stage('Maven Build'){
+                }   
+	stage('Maven Build'){
             steps{
                 sh "mvn clean package"
             }
