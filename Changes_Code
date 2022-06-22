@@ -12,7 +12,8 @@ pipeline{
                     git credentialsId: 'github', 
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
                 }
-			       
+			
+        
         stage('Maven Build'){
             steps{
                 sh "mvn clean package"
@@ -46,7 +47,7 @@ pipeline{
             }
         }
     }
-
+}
 
 def getversion(){
     def commithash = sh label: '', returnStdout: true, script: 'git rev-parse --short HEAD'
