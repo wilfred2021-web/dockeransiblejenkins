@@ -1,7 +1,7 @@
 <form action="action_page.php">
   <div class="container">
     <h1>Welcome to Jurassic Park</h1>
-    <p>Welcome to Online Sachin App.</p>
+    <p>Welcome to Online Sachin App2.</p>
     <hr>
      
     <label for="Name"><b>Enter Name</b></label>
