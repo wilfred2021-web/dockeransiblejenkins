@@ -1,6 +1,6 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>Welcome to Jurassic World Dominon</h1>
+    <h1>Welcome to Jurassic Park</h1>
     <p>Welcome to Online Sachin App.</p>
     <hr>
      
