@@ -10,7 +10,7 @@ println(changes.getEscapedDiff())
      for (commit in changes.getCommits()) {
                   println(commit)
                   def commitInfo = commit.getCommitInfo()
-                  println(commitInfo.getCommitName())
+                  println(commitInfo.getCommitterName())
                   println(commitInfo.getCommitDate())
                   println(commitInfo.getCommitMessage())
                   println(commit.getChanges())
