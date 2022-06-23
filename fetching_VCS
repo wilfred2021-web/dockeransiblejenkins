@@ -11,14 +11,12 @@ println(changes.getEscapedDiff())
                   println(commit)
                   def commitInfo = commit.getCommitInfo()
                   println(commitInfo)
+                  println(commitInfo.getCommitName())
+                  println(commitInfo.getCommitDate())
                   println(commitInfo.getCommitMessage())
                   println(commit.getChanges())
 commitDetails = commitDetails + '----------------------------------====CommitID: '+commitInfo.getCommitId()+' ============------------------------------<br/>'
-commitDetails = commitDetails + 'Committed By: <b>'+commitInfo.getCommitterName()+'('+commitInfo.getCommitterEmail()+')</b><br/>'
-commitDetails = commitDetails + 'Committed On: <b>'+commitInfo.getCommitDate()+'</b><br/>'
-commitDetails = commitDetails + 'Committed Message: <b>'+commitInfo.getCommitMessage()+'</b><br/>'
 commitDetails = commitDetails + '----------------------------------=====================------------------------------<br/>'
-print(commitInfo)
 print '........----------------====================-------------------...........'
 }
 def diff = publisher.getDiff()
