@@ -10,11 +10,11 @@ println(changes.getEscapedDiff())
      for (commit in changes.getCommits()) {
                   println(commit)
                   def commitInfo = commit.getCommitInfo()
-                  println(commitInfo)
                   println(commitInfo.getCommitName())
                   println(commitInfo.getCommitDate())
                   println(commitInfo.getCommitMessage())
                   println(commit.getChanges())
+                  println(commitInfo)
 }
 def diff = publisher.getDiff()
 writeFile file: 'build.diff', text: diff
