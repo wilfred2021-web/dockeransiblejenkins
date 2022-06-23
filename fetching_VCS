@@ -1,0 +1,31 @@
+pipeline {
+    stages{
+      stage("checkout") {
+        steps { 
+           git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
+        }
+      }
+def fetchLastCommitInfo(specificRevisionID) {
+print '...........................Fetching last commit..................................'
+if(specificRevisionID) specificRevisionID = specificRevisionID.trim().toString()
+else specificRevisionID = ""
+script{
+def publisher = LastChanges.getLastChangesPublisher null, "SIDE", "LINE", true, true, "", "", specificRevisionID, "", ""
+publisher.publishLastChanges()
+def changes = publisher.getLastChanges()
+def commitDetails = ''
+for (commit in changes.getCommits()) {
+def commitInfo = commit.getCommitInfo()
+commitDetails = commitDetails + '----------------------------------====CommitID: '+commitInfo.getCommitId()+' ============------------------------------<br/>'
+commitDetails = commitDetails + 'Committed By: <b>'+commitInfo.getCommitterName()+'('+commitInfo.getCommitterEmail()+')</b><br/>'
+commitDetails = commitDetails + 'Committed On: <b>'+commitInfo.getCommitDate()+'</b><br/>'
+commitDetails = commitDetails + 'Committed Message: <b>'+commitInfo.getCommitMessage()+'</b><br/>'
+commitDetails = commitDetails + '----------------------------------=====================------------------------------<br/>'
+print(commitInfo)
+print '........----------------====================-------------------...........'
+}
+def diff = publisher.getDiff()
+writeFile file: 'build.diff', text: diff
+return commitDetails;
+}
+}
