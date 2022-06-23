@@ -16,8 +16,5 @@ println(changes.getEscapedDiff())
                   println(commit.getChanges())
                   println(commitInfo)
 }
-def diff = publisher.getDiff()
-writeFile file: 'build.diff', text: diff
-return commitDetails;
 }
       }
