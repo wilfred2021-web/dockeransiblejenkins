@@ -1,10 +1,7 @@
-pipeline {
-    stages{
-      stage("checkout") {
-        steps { 
-           git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
-        }
-      }
+node {
+      stage("checkout") {
+        git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
+      }
 def fetchLastCommitInfo(specificRevisionID) {
 print '...........................Fetching last commit..................................'
 if(specificRevisionID) specificRevisionID = specificRevisionID.trim().toString()
@@ -27,7 +24,5 @@ print '........----------------====================-------------------..........
 def diff = publisher.getDiff()
 writeFile file: 'build.diff', text: diff
 return commitDetails;
-}
-}
 }
 }
