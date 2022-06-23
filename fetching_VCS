@@ -2,11 +2,7 @@ node {
       stage("checkout") {
         git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
       }
-def fetchLastCommitInfo(specificRevisionID) {
-print '...........................Fetching last commit..................................'
-if(specificRevisionID) specificRevisionID = specificRevisionID.trim().toString()
-else specificRevisionID = ""
-script{
+stage("last-changes") {
 def publisher = LastChanges.getLastChangesPublisher null, "SIDE", "LINE", true, true, "", "", specificRevisionID, "", ""
 publisher.publishLastChanges()
 def changes = publisher.getLastChanges()
