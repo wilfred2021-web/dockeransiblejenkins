@@ -15,8 +15,7 @@
         name: docker
         state: started
         enabled: yes
-   
-      pip:
+       pip:
         name: docker-py
         state: present
     - name: Start the container
