@@ -16,9 +16,7 @@
         state: started
         enabled: yes
         
-      pip:
-        name: docker-py
-        state: present
+      
     - name: Start the container
       docker_container:
         name: hariapp
