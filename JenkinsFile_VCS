@@ -14,6 +14,23 @@ pipeline{
                     url: 'https://github.com/SanjaiE/dockeransiblejenkins.git'
             }
         }
+	stage("last-changes") {
+def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
+publisher.publishLastChanges()
+def changes = publisher.getLastChanges()
+println(changes.getEscapedDiff())
+     for (commit in changes.getCommits()) {
+                  println(commit)
+                  def commitInfo = commit.getCommitInfo()
+                  println(commitInfo.getCommitterName())
+                  println(commitInfo.getCommitDate())
+                  println(commitInfo.getCommitMessage())
+                  println(commit.getChanges())
+                  println(commitInfo)
+                  print '........----------------====================-------------------...........'
+
+}
+}
         
         stage('Maven Build'){
             steps{
