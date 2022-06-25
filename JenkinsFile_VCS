@@ -8,7 +8,7 @@ pipeline{
     }
 
     stages{
-        stage('SCM'){
+        stage('last-changes'){
             steps{
                 git credentialsId: 'github', 
                     url: 'https://github.com/SanjaiE/dockeransiblejenkins.git'
