@@ -1,8 +1,5 @@
 pipeline{
     agent any
-    tools {
-      maven 'maven 3.8.5'
-    }
     stage("last-changes") {
 def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
 publisher.publishLastChanges()
@@ -20,6 +17,10 @@ println(changes.getEscapedDiff())
 
 }
 }
+    tools {
+      maven 'maven 3.8.5'
+    }
+    
     environment {
       Docker_TAG = getversion()
     }
