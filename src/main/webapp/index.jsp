@@ -1,7 +1,7 @@
 <form action="action_page.php">
   <div class="container">
     <h1>Welcome to Rummy Circle</h1>
-    <p>Sehwag.</p>
+    <p>Sehwag Cricket Player.</p>
     <hr>
      
     <label for="Name"><b>Enter Name</b></label>
