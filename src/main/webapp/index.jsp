@@ -1,7 +1,7 @@
 <form action="action_page.php">
   <div class="container">
     <h1>Welcome to Rummy Circle</h1>
-    <p>Welcome to Online Sachin Saga App.</p>
+    <p>Sehwag.</p>
     <hr>
      
     <label for="Name"><b>Enter Name</b></label>
