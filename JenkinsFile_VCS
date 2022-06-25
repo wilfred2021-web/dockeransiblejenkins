@@ -1,18 +1,4 @@
-node{
-    tools {
-    maven 'maven 3.8.5'
-    }
-    environment {
-      Docker_TAG = getversion()
-    }
-
-    stages{
-        stage('SCM'){
-            
-                git credentialsId: 'github', 
-                    url: 'https://github.com/SanjaiE/dockeransiblejenkins.git'
-                    }
-	stage("last-changes") {
+stage("last-changes") {
 def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
 publisher.publishLastChanges()
 def changes = publisher.getLastChanges()
@@ -30,6 +16,23 @@ println(changes.getEscapedDiff())
 }
 }
         
+pipeline{
+agent any
+    tools {
+    maven 'maven 3.8.5'
+    }
+    environment {
+      Docker_TAG = getversion()
+    }
+
+    stages{
+        stage('SCM'){
+            steps{
+                git credentialsId: 'github', 
+                    url: 'https://github.com/SanjaiE/dockeransiblejenkins.git'
+                    }
+		    }
+	
         stage('Maven Build'){
             steps{
                 sh "mvn clean package"
