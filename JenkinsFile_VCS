@@ -1,25 +1,7 @@
-stage("last-changes") {
-def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
-publisher.publishLastChanges()
-def changes = publisher.getLastChanges()
-println(changes.getEscapedDiff())
-     for (commit in changes.getCommits()) {
-                  println(commit)
-                  def commitInfo = commit.getCommitInfo()
-                  println(commitInfo.getCommitterName())
-                  println(commitInfo.getCommitDate())
-                  println(commitInfo.getCommitMessage())
-                  println(commit.getChanges())
-                  println(commitInfo)
-                  print '........----------------====================-------------------...........'
-
-}
-}
-        
 pipeline{
-agent any
+    agent any
     tools {
-    maven 'maven 3.8.5'
+      maven 'maven 3.8.5'
     }
     environment {
       Docker_TAG = getversion()
@@ -30,14 +12,15 @@ agent any
             steps{
                 git credentialsId: 'github', 
                     url: 'https://github.com/SanjaiE/dockeransiblejenkins.git'
-                    }
-		    }
-	
+            }
+        }
+        
         stage('Maven Build'){
             steps{
                 sh "mvn clean package"
             }
         }
+
          stage('Docker Build'){
             steps{
                 sh "docker build . -t nrbaskar/hariapp:${Docker_TAG}"
@@ -67,6 +50,24 @@ agent any
         }
     }
 }
+		stage("last-changes") {
+def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
+publisher.publishLastChanges()
+def changes = publisher.getLastChanges()
+println(changes.getEscapedDiff())
+     for (commit in changes.getCommits()) {
+                  println(commit)
+                  def commitInfo = commit.getCommitInfo()
+                  println(commitInfo.getCommitterName())
+                  println(commitInfo.getCommitDate())
+                  println(commitInfo.getCommitMessage())
+                  println(commit.getChanges())
+                  println(commitInfo)
+                  print '........----------------====================-------------------...........'
+
+}
+}
+
 def getversion(){
     def commithash = sh label: '', returnStdout: true, script: 'git rev-parse --short HEAD'
     return commithash
