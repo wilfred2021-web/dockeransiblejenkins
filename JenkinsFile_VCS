@@ -52,6 +52,7 @@ pipeline{
         }
     }
 }
+node{
  stage("last-changes") {
 def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
 publisher.publishLastChanges()
@@ -67,6 +68,7 @@ println(changes.getEscapedDiff())
                   println(commitInfo)
                   print '........----------------====================-------------------...........'
 
+}
 }
 }
 		
