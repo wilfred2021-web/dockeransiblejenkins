@@ -1,7 +1,7 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>Welcome to World Cup T20</h1>
-    <p> Kapil DEV Cricket Player.</p>
+    <h1>Indian Cinima Pride</h1>
+    <p> Super Star Rajinikanth.</p>
     <hr>
      
     <label for="Name"><b>Enter Name</b></label>
