@@ -10,6 +10,7 @@ pipeline{
     }
 
     stages{
+	emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
         stage('last-changes'){
             steps{
                 git credentialsId: 'github', 
@@ -53,7 +54,6 @@ pipeline{
     }
 }
 node{
-emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
  stage("last-changes") {
 def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
 publisher.publishLastChanges()
