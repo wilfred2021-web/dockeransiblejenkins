@@ -12,8 +12,7 @@ pipeline{
     stages{
 	        stage('last-changes'){
             steps{
-			emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
-                git credentialsId: 'github', 
+			        git credentialsId: 'github', 
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
             }
         }
@@ -32,8 +31,7 @@ pipeline{
 		
         stage('Dockerhub Push'){
 		   steps{
-		   emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
-                withCredentials([string(credentialsId: 'docker-hub', variable: 'dockerHubPwd')]) {
+		        withCredentials([string(credentialsId: 'docker-hub', variable: 'dockerHubPwd')]) {
                     sh "docker login -u nrbaskar -p ${dockerHubPwd}"
                 }
                 
@@ -58,6 +56,7 @@ pipeline{
 }
 node{
  stage("last-changes") {
+ try {
  emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
  def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
 publisher.publishLastChanges()
@@ -73,8 +72,12 @@ println(changes.getEscapedDiff())
                   println(commitInfo)
                   print '........----------------====================-------------------...........'
 
-}
-}
+    }
+        } catch (err) {
+		   emailext body: "${err}" , subject: 'Failure' , to: 'testing.itest@sifycorp.com'
+		
+		}
+		}
 }
 		
 
