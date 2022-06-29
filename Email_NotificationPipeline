@@ -10,8 +10,7 @@ pipeline{
     }
 
     stages{
-	emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
-        stage('last-changes'){
+	        stage('last-changes'){
             steps{
                 git credentialsId: 'github', 
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
@@ -54,7 +53,9 @@ pipeline{
     }
 }
 node{
+try{
  stage("last-changes") {
+ emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
 def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
 publisher.publishLastChanges()
 def changes = publisher.getLastChanges()
@@ -69,6 +70,7 @@ println(changes.getEscapedDiff())
                   println(commitInfo)
                   print '........----------------====================-------------------...........'
 
+}
 }
 }
 }
