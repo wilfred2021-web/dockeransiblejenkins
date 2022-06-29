@@ -53,7 +53,6 @@ pipeline{
     }
 }
 node{
-try{
  stage("last-changes") {
  emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
 def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
@@ -70,7 +69,6 @@ println(changes.getEscapedDiff())
                   println(commitInfo)
                   print '........----------------====================-------------------...........'
 
-}
 }
 }
 }
