@@ -28,6 +28,7 @@ pipeline{
                 sh "docker build . -t nrbaskar/hariapp:${Docker_TAG}"
             }
         }
+		try {
         stage('Dockerhub Push'){
 		   steps{
 		   emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
@@ -39,6 +40,7 @@ pipeline{
             }
 			
         }
+		}
 		     
         stage('docker dev server'){
             steps{
