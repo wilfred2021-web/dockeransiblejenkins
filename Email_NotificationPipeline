@@ -29,14 +29,16 @@ pipeline{
             }
         }
         stage('Dockerhub Push'){
-	   steps{
-	   emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
+		try {
+		emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
+            steps{
                 withCredentials([string(credentialsId: 'docker-hub', variable: 'dockerHubPwd')]) {
                     sh "docker login -u nrbaskar -p ${dockerHubPwd}"
                 }
                 
                 sh "docker push nrbaskar/hariapp:${Docker_TAG}"
             }
+			}
         }
 		     
         stage('docker dev server'){
