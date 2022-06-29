@@ -12,6 +12,7 @@ pipeline{
     stages{
 	        stage('last-changes'){
             steps{
+			emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
                 git credentialsId: 'github', 
                     url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
             }
