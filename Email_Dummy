@@ -2,7 +2,7 @@ node {
     if (params.ENVIRONMENT == 'development') {
         stage('Notify All') {
             cleanWs()
-            git branch: env.master_BRANCH, credentialsId: 'github', url: https://github.com/nrBaskar/dockeransiblejenkins.git
+            git branch: env.master_BRANCH, credentialsId: 'github', url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
             timestamps{
                 sh label: '', script: '''
                     cd /var/lib/jenkins/workspace/$JOB_NAME
