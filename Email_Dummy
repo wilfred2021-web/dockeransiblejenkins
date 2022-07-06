@@ -1,6 +1,5 @@
 node {
-    if (params.ENVIRONMENT == 'development') {
-        stage('Notify All') {
+            stage('Notify All') {
             cleanWs()
             git branch: env.master_BRANCH, credentialsId: 'github', url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
             timestamps{
@@ -21,5 +20,4 @@ node {
                     sendEmail(emailSubject, emailBody, recipients, true);
                }
         }
-        }
-}
+    }
