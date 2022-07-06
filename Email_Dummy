@@ -10,7 +10,7 @@ node {
                     def emailSubject = "Jenkins Notification: EVX Development pipeline triggered for Build ID #${env.BUILD_NUMBER}";
                     def emailBody = """
                         <p>Hi EVX DEV Team,</p>
-                        <p>The EVX development pipeline has been triggered from Repo: ${env.EVX_GIT_REPO} for Branch: ${env.master}</p>
+                        <p>The EVX development pipeline has been triggered from Repo: ${env.https://github.com/nrBaskar/dockeransiblejenkins.git} for Branch: ${env.master}</p>
                         <p>Please find the last commit details below:</p>
                         <p>${commitDetails}</p>
                         <p>See attached diff of <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b>.</p>
