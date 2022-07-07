@@ -1,88 +1,43 @@
-pipeline{
-    agent any
-   
-    tools {
-      maven 'maven 3.8.5'
+/** Function to send Email*/
+def sendEmail(emailSubject, emailBody, recipients, hasAttachment) {
+    print '...........................Sending Email..................................'    
+    if(hasAttachment){
+        emailext (subject: emailSubject, attachmentsPattern: '**/*.diff',  mimeType: 'text/html', body: emailBody, to: recipients);
+    } else {
+        emailext (subject: emailSubject, mimeType: 'text/html', body: emailBody, to: recipients);
     }
-    
-    environment {
-      Docker_TAG = getversion()
-    }
+}
+/** config*/
+def TESTERS = "${env.TEST_USER}"
 
-    stages{
-	        stage('last-changes'){
-            steps{
-			        git credentialsId: 'github', 
-                    url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
-            }
-        }
-        
-        stage('Maven Build'){
-            steps{
-                sh "mvn clean package"
-            }
-        }
-
-         stage('Docker Build'){
-            steps{
-                sh "docker build . -t nrbaskar/hariapp:${Docker_TAG}"
-            }
-        }
-		
-        stage('Dockerhub Push'){
-		   steps{
-		        withCredentials([string(credentialsId: 'docker-hub', variable: 'dockerHubPwd')]) {
-                    sh "docker login -u nrbaskar -p ${dockerHubPwd}"
-                }
-                
-                sh "docker push nrbaskar/hariapp:${Docker_TAG}"
-            }
+/** Pipeline steps begin **/
+node {
+      try{
+	  		stage('Notify All') {
+			cleanWs() 		         
+            def emailSubject = "Jenkins Notification: Testing pipeline triggered for Build ID #${BUILD_NUMBER}";
+                    def emailBody = """
+                        <p>Hi Tesing Team,</p>
+                        <p>The Testing pipeline has been triggered from Repo: 
+                        <p>Please find the last commit details below:</p>
+                        <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
+                    <p>With Regards,</p>
+                    <p>Sify Jenkins Admin</p>"""
+                    def recipients = TESTERS
+                    sendEmail(emailSubject, emailBody, recipients, true);
+               }
+			}	
 			
-        }
-				     
-        stage('docker dev server'){
-            steps{
-                ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
-                
-            }
-        }
-		stage('docker test server'){
-            steps{
-                ansiblePlaybook credentialsId: 'testing-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'test.inv', playbook: 'deploy_test.yml'
-                
-            }
-        }
-    }
-}
-node{
- stage("last-changes") {
- try {
- emailext body: 'Devops Email Send Successfully', subject: 'Devops Email Check', to: 'testing.itest@sifycorp.com'
- def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
-publisher.publishLastChanges()
-def changes = publisher.getLastChanges()
-println(changes.getEscapedDiff())
-     for (commit in changes.getCommits()) {
-                  println(commit)
-                  def commitInfo = commit.getCommitInfo()
-                  println(commitInfo.getCommitterName())
-                  println(commitInfo.getCommitDate())
-                  println(commitInfo.getCommitMessage())
-                  println(commit.getChanges())
-                  println(commitInfo)
-                  print '........----------------====================-------------------...........'
-
-    }
-        } catch (err) {
-		   emailext body: "${err}" , subject: 'Failure' , to: 'testing.itest@sifycorp.com'
-		
-		}
-		}
-}
-		
-
-def getversion(){
-    def commithash = sh label: '', returnStdout: true, script: 'git rev-parse --short HEAD'
-    return commithash
-    
-}
+		catch(err) {
+                        print "========Sending failure email ===================="                      
+                        def emailSubject = "Jenkins Notification: Testing deployment for Build ID #${BUILD_NUMBER} has failed"
+                        def emailBody = """
+                        <p>Hi Testing Team,</p>
+                        <p>Your last deployment failed due to error: ${err}</p>
+                        <p>With Regards,</p>
+                        <p>Sify Jenkins</p>
+                        """
+                        def recipients = TESTERS
+                        sendEmail(emailSubject, emailBody, recipients, false);
+                    }
+                }
