@@ -9,16 +9,19 @@ def sendEmail(emailSubject, emailBody, recipients, hasAttachment) {
 }
 /** config*/
 def TESTERS = "${env.TEST_USER}"
+def JOB_NAME = "${env.JOB_NAME}"
+
 
 /** Pipeline steps begin **/
 node {
       try{
 	  		stage('Notify All') {
-			cleanWs() 		         
-            def emailSubject = "Jenkins Notification: Testing pipeline triggered for Build ID #${BUILD_NUMBER}";
+			cleanWs() 	
+			
+            def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
                     def emailBody = """
-                        <p>Hi Tesing Team,</p>
-                        <p>The Testing pipeline has been triggered from Repo: 
+                        <p>Hi Devops Team,</p>
+                        <p>Jenkins File Deployment Process for mail_notification is Success : 
                         <p>Please find the last commit details below:</p>
                         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
                     <p>With Regards,</p>
@@ -26,11 +29,13 @@ node {
                     def recipients = TESTERS
                     sendEmail(emailSubject, emailBody, recipients, true);
                }
-			}	
+			}
 			
+			
+						
 		catch(err) {
                         print "========Sending failure email ===================="                      
-                        def emailSubject = "Jenkins Notification: Testing deployment for Build ID #${BUILD_NUMBER} has failed"
+                        def emailSubject = "Jenkins Notification: Mail Notification for Build ID #${BUILD_NUMBER} has failed"
                         def emailBody = """
                         <p>Hi Testing Team,</p>
                         <p>Your last deployment failed due to error: ${err}</p>
@@ -41,3 +46,5 @@ node {
                         sendEmail(emailSubject, emailBody, recipients, false);
                     }
                 }
+			
+	
