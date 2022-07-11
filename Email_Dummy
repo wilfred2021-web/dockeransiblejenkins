@@ -52,9 +52,9 @@ def Commit_Id = "${env.commit_Id}"
                         <p>Please find the last commit details below:</p>
                         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
 				  println(commit)
-                  println(commitInfo.getCommitterName())
-                  println(commitInfo.getCommitDate())
-                  println(commitInfo.getCommitMessage())
+                  println Reevision no :- $(commitInfo.getCommitterName())
+                  println Date and Time:- $(commitInfo.getCommitDate())
+                  println Commit message :- $(commitInfo.getCommitMessage())
                   println(commit.getChanges())
                   println(commitInfo)
                   print '........----------------====================-------------------...........'
