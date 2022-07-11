@@ -7,7 +7,7 @@ def sendEmail(emailSubject, emailBody, recipients, hasAttachment) {
         emailext (subject: emailSubject, mimeType: 'text/html', body: emailBody, to: recipients);
     }
 }
-def commitInfo = commit.getCommitInfo()
+
 node {
       stage("checkout") {
         git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
