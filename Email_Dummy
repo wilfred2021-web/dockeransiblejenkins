@@ -19,10 +19,12 @@ publisher.publishLastChanges()
 def changes = publisher.getLastChanges()
 println(changes.getEscapedDiff())
 	script{
-	
-	for (commit in changes.getCommits()) {
-        env.GIT_COMMIT_INFO = commit.getCommitInfo();
-	}
+		for (commit in changes.getCommits()) {
+			for(cmt in commit){
+				println(cmt);
+			}
+			env.GIT_COMMIT_INFO = commit.getCommitInfo();
+		}
 	}
      
 }
