@@ -21,7 +21,7 @@ println(changes.getEscapedDiff())
 	script{
 		for (commit in changes.getCommits()) {
 			for(cmt in commit){
-				println(">>>".cmt);
+				println(">>>"+cmt);
 			}
 			env.GIT_COMMIT_INFO = commit.getCommitInfo();
 		}
