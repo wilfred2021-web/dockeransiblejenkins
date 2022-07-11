@@ -19,6 +19,10 @@ println(changes.getEscapedDiff())
 
 }
 }
+/** config*/
+def TESTERS = "${env.TEST_USER}"
+def JOB_NAME = "${env.JOB_NAME}"
+
     /** Pipeline steps begin **/
 
       try{
@@ -36,7 +40,9 @@ println(changes.getEscapedDiff())
                     def recipients = TESTERS
                     sendEmail(emailSubject, emailBody, recipients, true);
                }
-			}			
+			}
+			
+			
 						
 		catch(err) {
                         print "========Sending failure email ===================="                      
