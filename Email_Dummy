@@ -25,7 +25,7 @@ println(changes.getEscapedDiff())
 			}
 			env.GIT_COMMIT_AUTHOR = sh(returnStdout: true, script: 'git log --format="%ae" | head -1').trim()
 			env.GIT_COMMIT_ID = sh(returnStdout: true, script: 'git log --pretty=format:"%h" --no-patch | head -1').trim()
-			env.GIT_COMMIT_DATE = sh(returnStdout: true, script: 'git log --graph --pretty=format:"%C(auto)%h%d (%cr) %cn <%ce> %s" --date=short | head -1').trim()
+			env.GIT_COMMIT_DATE = sh(returnStdout: true, script: 'git log --graph --pretty=format:"%cd" --date=short | head -1').trim()
 		}
 	}
      
