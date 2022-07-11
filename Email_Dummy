@@ -1,23 +1,52 @@
 node {
-            stage('Notify All') {
-            cleanWs()
-            git branch: env.master_BRANCH, credentialsId: 'github', url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
-            timestamps{
-                sh label: '', script: '''
-                    cd /var/lib/jenkins/workspace/$JOB_NAME
-                    env.WORKSPACE = pwd()
-                    def commitDetails = fetchLastCommitInfo(SPECIFIC_REVISION_ID);
-                    def emailSubject = "Jenkins Notification: EVX Development pipeline triggered for Build ID #${env.BUILD_NUMBER}";
+      stage("checkout") {
+        git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
+      }
+stage("last-changes") {
+def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
+publisher.publishLastChanges()
+def changes = publisher.getLastChanges()
+println(changes.getEscapedDiff())
+     for (commit in changes.getCommits()) {
+                  println(commit)
+                  def commitInfo = commit.getCommitInfo()
+                  println(commitInfo.getCommitterName())
+                  println(commitInfo.getCommitDate())
+                  println(commitInfo.getCommitMessage())
+                  println(commit.getChanges())
+                  println(commitInfo)
+                  print '........----------------====================-------------------...........'
+
+}
+}
+    /** Pipeline steps begin **/
+
+      try{
+	  		stage('Notify All') {
+			cleanWs() 	
+			
+            def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
                     def emailBody = """
-                        <p>Hi EVX DEV Team,</p>
-                        <p>The EVX development pipeline has been triggered from Repo: ${env.https://github.com/nrBaskar/dockeransiblejenkins.git} for Branch: ${env.master}</p>
+                        <p>Hi Devops Team,</p>
+                        <p>Jenkins File Deployment Process for mail_notification is Success : 
                         <p>Please find the last commit details below:</p>
-                        <p>${commitDetails}</p>
-                        <p>See attached diff of <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b>.</p>
+                        <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
                     <p>With Regards,</p>
                     <p>Sify Jenkins Admin</p>"""
-                    def recipients = suther.sanjai@sifycorp.com
+                    def recipients = TESTERS
                     sendEmail(emailSubject, emailBody, recipients, true);
-               }
-        }
-    }
+               }			
+               }						
+		catch(err) {
+                        print "========Sending failure email ===================="                      
+                        def emailSubject = "Jenkins Notification: Mail Notification for Build ID #${BUILD_NUMBER} has failed"
+                        def emailBody = """
+                        <p>Hi Testing Team,</p>
+                        <p>Your last deployment failed due to error: ${err}</p>
+                        <p>With Regards,</p>
+                        <p>Sify Jenkins</p>
+                        """
+                        def recipients = TESTERS
+                        sendEmail(emailSubject, emailBody, recipients, false);
+                    }
+                }
