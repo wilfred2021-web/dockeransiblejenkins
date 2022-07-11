@@ -26,8 +26,7 @@ println(changes.getEscapedDiff())
                   println(commitInfo)
                   print '........----------------====================-------------------...........'
 
-}
-}
+
 /** config*/
 def TESTERS = "${env.TEST_USER}"
 def JOB_NAME = "${env.JOB_NAME}"
@@ -67,3 +66,5 @@ def JOB_NAME = "${env.JOB_NAME}"
                         sendEmail(emailSubject, emailBody, recipients, false);
                     }
                 }
+				}
+				}
