@@ -51,12 +51,12 @@ def Commit_Id = "${env.commit_Id}"
                         <p>Jenkins File Deployment Process for mail_notification is Success : 
                         <p>Please find the last commit details below:</p>
                         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
-				  println(commit)
-                  println Reevision no :- $(commitInfo.getCommitterName())
-                  println Date and Time:- $(commitInfo.getCommitDate())
-                  println Commit message :- $(commitInfo.getCommitMessage())
-                  println(commit.getChanges())
-                  println(commitInfo)
+				  <p>(commit)
+                  <p> Reevision no :- <b>$(commitInfo.getCommitterName())
+                  <p> Date and Time:- <b>$(commitInfo.getCommitDate())
+                  <p> Commit message :- <b>$(commitInfo.getCommitMessage())
+                  <p>(commit.getChanges())
+                  <p>(commitInfo)
                   print '........----------------====================-------------------...........'
 
 						<p>Commit Id Number of <b>${commitInfo}
