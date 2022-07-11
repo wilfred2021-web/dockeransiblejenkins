@@ -24,6 +24,8 @@ println(changes.getEscapedDiff())
 				println(">>>"+cmt);
 			}
 			env.GIT_COMMIT_AUTHOR = sh(returnStdout: true, script: 'git log --format="%ae" | head -1').trim()
+			env.GIT_COMMIT_ID = sh(returnStdout: true, script: 'git log --pretty=format:"%h" --no-patch | head -1').trim()
+			env.GIT_COMMIT_DATE = sh(returnStdout: true, script: 'git log --graph --pretty=format:"%C(yellow)%h%x09%Creset%C(cyan)%C(bold)%ad%Creset  %C(green)%Creset %s" --date=short | head -1').trim()
 
 			env.GIT_COMMIT_INFO = commit.getCommitInfo();
 		}
@@ -46,8 +48,9 @@ def Commit_Id = "${env.commit_Id}"
                         <p>Jenkins File Deployment Process for mail_notification is Success : 
                         <p>Please find the last commit details below:</p>
                         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
-				  	<p>Commit Id Number of <b>${env.GIT_COMMIT_INFO}
-					<p>Author ${env.GIT_COMMIT_AUTHOR}</p>
+				  	<p>Commit Id: <b>${env.GIT_COMMIT_ID}</p>
+					<p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
+					<p>Date: ${env.GIT_COMMIT_DATE}</p>
                     <p>With Regards,</p>
                     <p>Sify Jenkins Admin</p>"""
                     def recipients = TESTERS
