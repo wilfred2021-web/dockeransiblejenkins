@@ -1,7 +1,7 @@
 <form action="action_page.php">
   <div class="container">
     <h1>Indian Cinima Pride</h1>
-    <p> Yuvaraj Singh All rounder in indain cricket....</p> 
+    <p> Yuvaraj Singh All rounder in indain cricket team .....</p> 
     <hr>
      
     <label for="Name"><b>Enter Name</b></label>
