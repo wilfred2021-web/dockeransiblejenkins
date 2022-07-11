@@ -33,6 +33,7 @@ println(changes.getEscapedDiff())
                   println(commitInfo)
                   print '........----------------====================-------------------...........'
 }
+}
 
 /** config*/
 def TESTERS = "${env.TEST_USER}"
@@ -77,4 +78,3 @@ def Commit_Id = "${env.commit_Id}"
 				}
 				}
 				}
-}
