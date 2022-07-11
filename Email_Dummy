@@ -43,7 +43,7 @@ def Commit_Id = "${env.commit_Id}"
 			def changes = publisher.getLastChanges()	
 			def commitInfo = changes.getCommits();
 			for (commit in changes.getCommits()) {
-                 
+                  def commitInfo = commit.getCommitInfo()
            
             def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
                     def emailBody = """
@@ -51,7 +51,7 @@ def Commit_Id = "${env.commit_Id}"
                         <p>Jenkins File Deployment Process for mail_notification is Success : 
                         <p>Please find the last commit details below:</p>
                         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
-						<p>Commit Id Number of <b>${commit}
+						<p>Commit Id Number of <b>${commitInfo.Commit}
                     <p>With Regards,</p>
                     <p>Sify Jenkins Admin</p>"""
                     def recipients = TESTERS
