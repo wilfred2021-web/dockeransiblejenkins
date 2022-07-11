@@ -30,6 +30,7 @@ println(changes.getEscapedDiff())
 /** config*/
 def TESTERS = "${env.TEST_USER}"
 def JOB_NAME = "${env.JOB_NAME}"
+def Commit_Id = "${env.Commit_Id}"
 
     /** Pipeline steps begin **/
 
@@ -43,7 +44,7 @@ def JOB_NAME = "${env.JOB_NAME}"
                         <p>Jenkins File Deployment Process for mail_notification is Success : 
                         <p>Please find the last commit details below:</p>
                         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
-						<p>$(commit.getChanges())</b>.</p>
+						<p>Commit Id Number of <b>${env.Commit_Id}
                     <p>With Regards,</p>
                     <p>Sify Jenkins Admin</p>"""
                     def recipients = TESTERS
