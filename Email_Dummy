@@ -77,4 +77,3 @@ def Commit_Id = "${env.commit_Id}"
                 }
 				}
 				}
-				}
