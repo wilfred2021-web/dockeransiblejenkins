@@ -43,13 +43,13 @@ def JOB_NAME = "${env.JOB_NAME}"
                         <p>Jenkins File Deployment Process for mail_notification is Success : 
                         <p>Please find the last commit details below:</p>
                         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
-						<p>commit.getCommitInfo()</b>.</p>
+						<p>commit.getChanges()</b>.</p>
                     <p>With Regards,</p>
                     <p>Sify Jenkins Admin</p>"""
                     def recipients = TESTERS
                     sendEmail(emailSubject, emailBody, recipients, true);
                }
-			}
+			}	
 			
 			
 						
