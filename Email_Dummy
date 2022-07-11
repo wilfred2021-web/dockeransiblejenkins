@@ -35,8 +35,9 @@ println(changes.getEscapedDiff())
                     <p>Sify Jenkins Admin</p>"""
                     def recipients = TESTERS
                     sendEmail(emailSubject, emailBody, recipients, true);
-               }			
-               }						
+               }
+			}			
+						
 		catch(err) {
                         print "========Sending failure email ===================="                      
                         def emailSubject = "Jenkins Notification: Mail Notification for Build ID #${BUILD_NUMBER} has failed"
