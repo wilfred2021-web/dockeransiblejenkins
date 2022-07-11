@@ -41,9 +41,9 @@ def Commit_Id = "${env.commit_Id}"
 			def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
 			publisher.publishLastChanges()
 			def changes = publisher.getLastChanges()	
-			def commitInfo = changes.getCommits();
+			
 			for (commit in changes.getCommits()) {
-                  def commitInfo = commit.getCommitInfo()
+                def commitInfo = commit.getCommitInfo()
            
             def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
                     def emailBody = """
