@@ -1,7 +1,7 @@
 <form action="action_page.php">
   <div class="container">
     <h1>Indian Cinima Pride</h1>
-    <p> Yuvaraj Singh</p>
+    <p> Yuvaraj Singh All rounder</p>
     <hr>
      
     <label for="Name"><b>Enter Name</b></label>
