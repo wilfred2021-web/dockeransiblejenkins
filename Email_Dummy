@@ -65,7 +65,7 @@ def Commit_Id = "${env.commit_Id}"
                     def recipients = TESTERS
                     sendEmail(emailSubject, emailBody, recipients, true);
 			   }
-			}							
+										
 		catch(err) {
                         print "========Sending failure email ===================="                      
                         def emailSubject = "Jenkins Notification: Mail Notification for Build ID #${BUILD_NUMBER} has failed"
@@ -77,4 +77,6 @@ def Commit_Id = "${env.commit_Id}"
                         """
                         def recipients = TESTERS
                         sendEmail(emailSubject, emailBody, recipients, false);
-					}			
+					}	
+
+    }
