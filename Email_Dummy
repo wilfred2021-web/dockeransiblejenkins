@@ -43,9 +43,11 @@ def JOB_NAME = "${env.JOB_NAME}"
       try{
 	  		stage('Notify All') {
 			   def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
-			   cd var/lib/jenkins/$JOB_NAME
-			   env.workspace=pwd()
-			   println(env.workspace)
+			   script{
+				   env.workspace=pwd
+				   println(env.workspace)
+			   }
+			   
                     def emailBody = """
                         <p>Hi Devops Team,</p>
                         <p>Jenkins File Deployment Process for mail_notification is Success : 
