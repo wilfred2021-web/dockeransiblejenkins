@@ -30,7 +30,7 @@ def fetchLastCommitInfo(specificRevisionID) {
 
         }
         def diff = publisher.getDiff()
-        writeFile file: 'build.txt', text: txt    
+        writeFile file: 'build.txt', text: diff    
         return commitDetails;
     }
 }
