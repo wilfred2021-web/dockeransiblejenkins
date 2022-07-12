@@ -44,7 +44,7 @@ def JOB_NAME = "${env.JOB_NAME}"
 	  		stage('Notify All') {
 			   def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
 			   script{
-			     cd /var/lib/jenkins/workspace/env.JOB_NAME
+			       sh(cd /var/lib/jenkins/workspace/env.JOB_NAME)
 				   env.workspace=pwd
 				   println(env.workspace)
 			   }
