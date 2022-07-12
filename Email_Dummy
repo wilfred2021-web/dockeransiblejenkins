@@ -47,7 +47,7 @@ def Commit_Id = "${env.commit_Id}"
             cd /var/lib/jenkins/workspace/$JOB_NAME
 			sh label: '', script: '''
                         echo "========Getting second last commit=========="
-                        git log -3 --format=%H | tail -n 1 > revision.txt
+                       	'git log --pretty=format:"%h" --no-patch | head -1').trim() > revision.txt
                         '''
                     env.WORKSPACE = pwd()
                     def SPECIFIC_REVISION_ID = readFile "${env.WORKSPACE}/revision.txt"
