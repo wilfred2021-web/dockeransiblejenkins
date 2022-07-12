@@ -7,29 +7,54 @@ def sendEmail(emailSubject, emailBody, recipients, hasAttachment) {
         emailext (subject: emailSubject, mimeType: 'text/html', body: emailBody, to: recipients);
     }
 }
+
+node {
+
+      stage("checkout") {
+        git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
+      }
+stage("last-changes") {
+def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
+publisher.publishLastChanges()
+def changes = publisher.getLastChanges()
+println(changes.getEscapedDiff())
+	script{
+		for (commit in changes.getCommits()) {
+			for(cmt in commit){
+				println(">>>"+cmt);
+			}
+			env.GIT_COMMIT_AUTHOR = sh(returnStdout: true, script: 'git log --format="%ae" | head -1').trim()
+			env.GIT_COMMIT_ID = sh(returnStdout: true, script: 'git log --pretty=format:"%h" --no-patch | head -1').trim()
+			env.GIT_COMMIT_DATE = sh(returnStdout: true, script: 'git log --graph --pretty=format:"%cd" | head -1').trim()
+		}
+	}
+     
+}
 /** config*/
 def TESTERS = "${env.TEST_USER}"
 def JOB_NAME = "${env.JOB_NAME}"
+def Commit_Id = "${env.commit_Id}"
 
+    /** Pipeline steps begin **/
 
-/** Pipeline steps begin **/
-node {
       try{
 	  		stage('Notify All') {
-			cleanWs() 	
-			
+           
             def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
                     def emailBody = """
                         <p>Hi Devops Team,</p>
                         <p>Jenkins File Deployment Process for mail_notification is Success : 
                         <p>Please find the last commit details below:</p>
                         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
+				  	<p>Commit Id: <b>${env.GIT_COMMIT_ID}</p>
+					<p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
+					<p>Date: ${env.GIT_COMMIT_DATE}</p>
                     <p>With Regards,</p>
                     <p>Sify Jenkins Admin</p>"""
                     def recipients = TESTERS
                     sendEmail(emailSubject, emailBody, recipients, true);
-               }
-			}
+			   }
+			}	
 			
 			
 						
@@ -46,5 +71,3 @@ node {
                         sendEmail(emailSubject, emailBody, recipients, false);
                     }
                 }
-			
-	
