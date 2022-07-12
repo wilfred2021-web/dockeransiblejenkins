@@ -43,14 +43,8 @@ def Commit_Id = "${env.commit_Id}"
 
       try{
 	  		stage('Notify All') {
-			sh label: '', script: '''
-            cd /var/lib/jenkins/workspace/$JOB_NAME '''
-			sh label: '', script: '''
-                        echo "========Getting second last commit=========="
-                       	env.GIT_COMMIT_ID = sh(returnStdout: true, script: 'git log --pretty=format:"%h" --no-patch | head -1').trim() > revision.txt
-                        '''
-                    env.WORKSPACE = pwd()
-                    def SPECIFIC_REVISION_ID = readFile "${env.WORKSPACE}/revision.txt"
+			env.WORKSPACE = pwd()
+			def version = readFile "${env.WORKSPACE}/version.txt"
             def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
                     def emailBody = """
                         <p>Hi Devops Team,</p>
@@ -77,5 +71,4 @@ def Commit_Id = "${env.commit_Id}"
                         """
                         def recipients = TESTERS
                         sendEmail(emailSubject, emailBody, recipients, false);
-					}	
-    
+					}
