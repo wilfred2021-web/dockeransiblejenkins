@@ -8,66 +8,532 @@ def sendEmail(emailSubject, emailBody, recipients, hasAttachment) {
     }
 }
 
-node {
+/** Function to fetch the last commit information*/
+def fetchLastCommitInfo(specificRevisionID) {
+    print '...........................Fetching last commit..................................'    
+    if(specificRevisionID)  specificRevisionID = specificRevisionID.trim().toString()
+    else specificRevisionID = ""
+    script{        
+        def publisher = LastChanges.getLastChangesPublisher null, "SIDE", "LINE", true, true, "", "", specificRevisionID, "", ""
+        publisher.publishLastChanges()
+        def changes = publisher.getLastChanges()
+        def commitDetails = ''
+        for (commit in changes.getCommits()) {
+            def commitInfo = commit.getCommitInfo()
+            commitDetails = commitDetails + '----------------------------------====CommitID: '+commitInfo.getCommitId()+' ============------------------------------<br/>'
+            commitDetails = commitDetails + 'Committed By: <b>'+commitInfo.getCommitterName()+'('+commitInfo.getCommitterEmail()+')</b><br/>'
+            commitDetails = commitDetails + 'Committed On: <b>'+commitInfo.getCommitDate()+'</b><br/>'
+            commitDetails = commitDetails + 'Committed Message: <b>'+commitInfo.getCommitMessage()+'</b><br/>'
+            commitDetails = commitDetails + '----------------------------------=====================------------------------------<br/>'
+            print(commitInfo)
+            print '........----------------====================-------------------...........'
 
-      stage("checkout") {
-        git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
-      }
-stage("last-changes") {
-def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
-publisher.publishLastChanges()
-def changes = publisher.getLastChanges()
-println(changes.getEscapedDiff())
-	script{
-		for (commit in changes.getCommits()) {
-			for(cmt in commit){
-				println(">>>"+cmt);
-			}
-			env.GIT_COMMIT_AUTHOR = sh(returnStdout: true, script: 'git log --format="%ae" | head -1').trim()
-			env.GIT_COMMIT_ID = sh(returnStdout: true, script: 'git log --pretty=format:"%h" --no-patch | head -1').trim()
-			env.GIT_COMMIT_DATE = sh(returnStdout: true, script: 'git log --graph --pretty=format:"%cd" | head -1').trim()
-		}
-		def diff = publisher.getDiff()
-        writeFile file: 'build.diff', text: diff    
-        return env.GIT_COMMIT_ID;
-	}
-     
+        }
+        def diff = publisher.getDiff()
+        writeFile file: 'build.txt', text: txt    
+        return commitDetails;
+    }
 }
 
 /** config*/
-def TESTERS = "${env.TEST_USER}"
-def JOB_NAME = "${env.JOB_NAME}"
+def APPROVERS = "${env.EVX_APPROVER_EMAILS}"
+def DEV_USERS = "${env.EVX_APPROVER_EMAILS} ${env.EVX_DEVELOPERS_EMAILS}"
+def ALL_USERS = "${env.EVX_APPROVER_EMAILS} ${env.EVX_DEVELOPERS_EMAILS} ${env.LW_TESTERS_EMAILS}"
 
-
-    /** Pipeline steps begin **/
-
-      try{
-	  		stage('Notify All') {
-			   def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
+/** Pipeline steps begin **/
+node {
+    if (params.ENVIRONMENT == 'development') {
+        stage('Notify All') {
+            cleanWs()
+            git branch: env.EVX_GIT_DEV_BRANCH, credentialsId: 'AsadSVN', url: env.EVX_GIT_REPO
+            timestamps{
+                sh label: '', script: '''
+                    cd /var/lib/jenkins/workspace/$JOB_NAME
+                    zip -rq ${BUILD_TAG}.zip ./* '''
+                    sshPublisher(publishers: [sshPublisherDesc(configName: 'pal-dev-env-176', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/zip', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/${BUILD_TAG}.zip')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)])
+                    sh label: '', script: '''
+                        echo "========Getting second last commit=========="
+                        git log -3 --format=%H | tail -n 1 > revision.txt
+                        '''
+                    env.WORKSPACE = pwd()
+                    def SPECIFIC_REVISION_ID = readFile "${env.WORKSPACE}/revision.txt"
+                    def commitDetails = a(SPECIFIC_REVISION_ID);
+                    def emailSubject = "Jenkins Notification: EVX Development pipeline triggered for Build ID #${env.BUILD_NUMBER}";
                     def emailBody = """
-                        <p>Hi Devops Team,</p>
-                        <p>Jenkins File Deployment Process for mail_notification is Success : 
+                        <p>Hi EVX DEV Team,</p>
+                        <p>The EVX development pipeline has been triggered from Repo: ${env.EVX_GIT_REPO} for Branch: ${env.EVX_GIT_DEV_BRANCH}</p>
                         <p>Please find the last commit details below:</p>
-                        <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
-				  	<p>Commit Id: <b>${env.GIT_COMMIT_ID}</p>
-					<p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
-					<p>Date: ${env.GIT_COMMIT_DATE}</p>
+                        <p>${commitDetails}</p>
+                        <p>See attached diff of <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b>.</p>
                     <p>With Regards,</p>
                     <p>Sify Jenkins Admin</p>"""
-                    def recipients = TESTERS
+                    def recipients = DEV_USERS
                     sendEmail(emailSubject, emailBody, recipients, true);
-			   }
-			}							
-		catch(err) {
+               }
+        }
+        stage('SAST'){          
+            print '............................SAST For development environment inititated........................'     
+            build(job: '/evx/admin-app/development-sast');
+        } 
+        stage('Build & Deploy'){
+            timestamps{
+                script{
+                    try{
+                        nodejs('build'){
+                            print '......................................................EVX DEV Deployment initiated......................................................'
+                            sshPublisher(continueOnError: false, failOnError: true, publishers: [sshPublisherDesc(configName: 'pal-dev-env-176', transfers: [sshTransfer(cleanRemote: true, excludes: '', execCommand: '''
+
+                                set +x
+                                echo "----------------------Removing old project-----------------"
+                                DESTINATION_PATH="/home/elearning"
+
+                                rm $DESTINATION_PATH/evx/backend/.env || exit $1
+                                rm -rf $DESTINATION_PATH/evx-end-user-backup/* || exit $1
+
+                                cp -r $DESTINATION_PATH/evx/backend/public/end-user/* $DESTINATION_PATH/evx-end-user-backup/ || exit $1
+                                unzip -qo $DESTINATION_PATH/zip/${BUILD_TAG}.zip -d $DESTINATION_PATH/evx/ || exit $1
+                                echo -e "$EVX_DEV_ENV_VARIABLES" > $DESTINATION_PATH/evx/backend/.env || exit $1
+                                
+                                sudo pm2 delete all || exit $1
+                                cd $DESTINATION_PATH/maintenance-server || exit $1
+                                echo  "Starting  HTTPS maintainence Server" 
+                                npm run start-https-maintanence || exit $1
+                                echo  "Starting  HTTP Server" 
+                                npm run start-http-maintanence || exit $1
+
+                                cd $DESTINATION_PATH/evx/frontend || exit $1
+                                echo  "Installing frontend dependency.."
+                                npm install || exit $1
+                                echo  "Initiating angular build.. " 
+                                ng build -c development || exit $1
+                                echo  "Installing backend dependency.. "
+                                cd $DESTINATION_PATH/evx/backend || exit $1
+
+                                npm install || exit $1
+                                echo  "Removed previous PM2.. " 
+                                sudo pm2 delete all || exit $1
+
+                                echo  "Starting  HTTPS Server"
+                                npm run start-https-server || exit $1
+                                echo  "Starting  HTTP Server" 
+                                npm run start-http-server || exit $1
+
+                                cp -r $DESTINATION_PATH/evx-end-user-backup/* $DESTINATION_PATH/evx/backend/public/end-user/
+                                rm -rf $DESTINATION_PATH/zip/* 
+                                ''', execTimeout: 30000000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: true, removePrefix: '', sourceFiles: '', usePty:true)], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)]);
+                           
+                            if ('FAILURE'.equals(currentBuild.result)) {
+                                print "Current Build failed due to SSH failure"
+                                print response
+                                //error('ssh error')
+                                throw new Exception("SSH Build error, check jenkins console for further details")
+                            }
+
+                            def emailSubject = "Jenkins Notification: EVX Development deployment for Build ID #${env.BUILD_NUMBER} is successful"
+                            def emailBody = """
+                            <p>Hi EVX Dev Team,</p>
+                            <p>The EVX development environment has been deployed successfully, with latest version.</p>
+                            <p>To login use: https://evxdemo.sifylivewire.com/</p>
+                            <p>With Regards,</p>
+                            <p>Sify Jenkins</p>
+                            """
+                            def recipients = DEV_USERS
+                            sendEmail(emailSubject, emailBody, recipients, false);
+                    
+                        }
+                    }catch(err) {
                         print "========Sending failure email ===================="                      
-                        def emailSubject = "Jenkins Notification: Mail Notification for Build ID #${BUILD_NUMBER} has failed"
+                        def emailSubject = "Jenkins Notification: EVX Development deployment for Build ID #${env.BUILD_NUMBER} has failed"
                         def emailBody = """
-                        <p>Hi Testing Team,</p>
+                        <p>Hi EVX Dev Team,</p>
                         <p>Your last deployment failed due to error: ${err}</p>
-						<p>With Regards,</p>
+                        <p>With Regards,</p>
                         <p>Sify Jenkins</p>
                         """
-                        def recipients = TESTERS
+                        def recipients = DEV_USERS
                         sendEmail(emailSubject, emailBody, recipients, false);
-					}
-					}
+                    }
+                }
+
+            }
+        }
+        stage('Lighthouse Report'){     
+            print '......................................................Performance testing.....................................................'
+            sh 'npx lighthouse-ci https://evxdemo.sifylivewire.com --jsonReport --report=.'
+            lighthouseReport file: './report.json', name: 'EVX Report'
+            
+        } 
+    }
+    else if (params.ENVIRONMENT == 'uat') {
+        stage('Notify Approvers'){
+            cleanWs()
+            print '......................................................Checking out UAT Master from SVN......................................................'
+            git branch: env.EVX_GIT_UAT_BRANCH, credentialsId: 'AsadSVN', url: env.EVX_GIT_REPO
+            sh label: '', script: '''
+                cd /var/lib/jenkins/workspace/$JOB_NAME
+                zip -rq ${BUILD_TAG}.zip ./* '''
+            timestamps {
+                script{
+                    def commitDetails = fetchLastCommitInfo("");
+                    def emailSubject = "Jenkins Notification: EVX UAT pipeline triggered for Build ID #${env.BUILD_NUMBER}";
+                    def emailBody = """
+                        <p>Hi EVX Team,</p>
+                        <p>The EVX UAT pipeline has been triggered from Repo: ${env.EVX_GIT_REPO} for Branch: ${env.EVX_GIT_UAT_BRANCH}</p>
+                        <p>Please find the last commit details below:</p>
+                        <p>${commitDetails}</p>
+                        <p>See attached diff of <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b>.</p>
+                        <p><a href="http://saasdemo.sifyitest.com:8080/job/evx/job/admin-app/job/evx-uat/${env.BUILD_NUMBER}/input">Approve this build</a></p>
+                        <p>With Regards,</p>
+                        <p>Sify Jenkins Admin</p>"""
+                    def recipients = APPROVERS
+                    sendEmail(emailSubject, emailBody, recipients, true);                    
+                }         
+                            
+            } 
+        }
+        stage('Notify All'){
+            input(message: "Do you want to approve this build?")
+            timestamps {
+				print '......................................................Checking out UAT Master from SVN......................................................'
+				git branch: env.EVX_GIT_UAT_BRANCH, credentialsId: 'AsadSVN', url: env.EVX_GIT_REPO
+				sh label: '', script: '''
+                    cd /var/lib/jenkins/workspace/$JOB_NAME
+                    zip -rq ${BUILD_TAG}.zip ./*'''
+				print '......................................................SSHing into Dev server......................................................'
+				sshPublisher(publishers: [sshPublisherDesc(configName: 'pal-test-env-168', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/zip', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '**/${BUILD_TAG}.zip')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)])
+                 def emailSubject = "Jenkins Notification: EVX UAT build for Build ID #${env.BUILD_NUMBER} is initiated";
+                 def emailBody = """
+                 <p>Hi EVX Team,</p>
+                <p>A build has been initiated in the EVX uat. We will let you know once the deployment is successful.</p>
+                <p>Please bare with us.</p>
+                <p>With Regards,</p>
+                <p>Sify Jenkins Admin</p>
+                 """
+                 def recipients = ALL_USERS
+                 sendEmail(emailSubject, emailBody, recipients, false);
+            }
+        }
+        stage('Build & Deploy') {
+           timestamps{
+               script{
+                   try{
+                        nodejs('build'){
+                            print '......................................................EVX UAT Deployment initiated......................................................'
+                            sshPublisher(continueOnError: false, failOnError: true,  publishers: [sshPublisherDesc(configName: 'pal-test-env-168', transfers: [sshTransfer(cleanRemote: true, excludes: '', execCommand: '''
+                                echo "----------------Removing old project-----------------------"
+                                set +x
+                                DESTINATION_PATH="/home/ssladmin"
+                                rm $DESTINATION_PATH/evx/backend/.env || exit $1
+                                rm -rf $DESTINATION_PATH/evx-end-user-backup/* || exit $1
+                                cp -r $DESTINATION_PATH/evx/backend/public/end-user/* $DESTINATION_PATH/evx-end-user-backup/ || exit $1
+                                unzip -qo $DESTINATION_PATH/zip/${BUILD_TAG}.zip -d $DESTINATION_PATH/evx/ || exit $1
+                                echo -e "$EVX_UAT_ENV_VARIABLES" > $DESTINATION_PATH/evx/backend/.env || exit $1 
+
+                                sudo pm2 delete all || exit $1 
+                                cd $DESTINATION_PATH/maintenance-server || exit $1 
+                                echo  "Starting  HTTPS maintainence Server"
+                                npm run start-https-maintanence || exit $1 
+                                echo  "Starting  HTTP Server"
+                                npm run start-http-maintanence || exit $1 
+
+                                cd $DESTINATION_PATH/evx/frontend || exit $1 
+                                echo  "Installing frontend dependency.."
+                                npm install || exit $1 
+                                echo  "Initiating angular build.. "
+                                ng build -c uat || exit $1 
+
+                                echo  "Installing backend dependency.. "
+                                cd $DESTINATION_PATH/evx/backend || exit $1 
+                                npm install || exit $1 
+                                echo  "Removed previous PM2.. "
+                                sudo pm2 delete all || exit $1 
+                                echo  "Starting  HTTPS Server"
+                                npm run start-https-server || exit $1 
+                                echo  "Starting  HTTP Server"
+                                npm run start-http-server || exit $1 
+
+                                cp -r $DESTINATION_PATH/evx-end-user-backup/* $DESTINATION_PATH/evx/backend/public/end-user/
+                                rm -rf $DESTINATION_PATH/zip/*
+
+                            ''', execTimeout: 30000000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: true, removePrefix: '', sourceFiles: '', usePty:true)], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)])
+                            if ('FAILURE'.equals(currentBuild.result)) {
+                                print "Current Build failed due to SSH failure"
+                                print response
+                                //error('ssh error')
+                                throw new Exception("SSH Build error, check jenkins console for further details")
+                            }
+
+                            def emailSubject = "Jenkins Notification: EVX UAT deployment for Build ID #${env.BUILD_NUMBER} is successful"
+                            def emailBody = """
+                            <p>Hi EVX Dev Team,</p>
+                            <p>The EVX UAT environment has been deployed successfully, with latest version.</p>
+                            <p>To login use: https://evxuat.sifylivewire.com/</p>
+                            <p>With Regards,</p>
+                            <p>Sify Jenkins</p>
+                            """
+                            def recipients = ALL_USERS
+                            sendEmail(emailSubject, emailBody, recipients, false);
+                                
+                        }
+                   }catch(err){
+                        print "========Sending failure email ===================="                      
+                        def emailSubject = "Jenkins Notification: EVX UAT deployment for Build ID #${env.BUILD_NUMBER} has failed"
+                        def emailBody = """
+                        <p>Hi EVX Team,</p>
+                        <p>Your last deployment failed due to error: ${err}</p>
+                        <p>With Regards,</p>
+                        <p>Sify Jenkins</p>
+                        """
+                        def recipients = ALL_USERS
+                        sendEmail(emailSubject, emailBody, recipients, false);
+                   }
+               }
+           }   
+        }
+    }         
+    else if (params.ENVIRONMENT == 'pre-prod-frontend') {
+        node('evx-pre-prod-builder'){
+            stage('Notify Approvers') {
+                cleanWs()
+                git branch: env.EVX_GIT_PRE_PROD_BRANCH, credentialsId: 'AsadSVN', url: env.EVX_GIT_REPO
+                script {					
+                    def commitDetails = fetchLastCommitInfo("");
+                    def emailSubject = "Jenkins Notification: Approve EVX pre-prod-frontend Build for JOB ID #${env.BUILD_NUMBER}"
+                    def emailBody = """
+                        <p>Hi Approver,</p>
+					    <p>The EVX Team pipeline has been triggered corresponding to Git repo branch: pre-prod</p>
+					    <p>Please find the last commit details below:</p>
+					    <p>${commitDetails}</p>
+					    <p><a href="https://aws-sifyjenkins.sifylivewire.com/job/evx/job/pre-prod/job/admin-app/job/frontend/${env.BUILD_NUMBER}/input">Approve this build</a></p>					   
+					    <p>See attached diff of <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b>.</p>
+                        <p>With Regards,</p>
+					    <p>Sify Jenkins Admin</p>"""
+                    def recipients = APPROVERS
+                    sendEmail(emailSubject, emailBody, recipients, true); 
+               }
+            }
+            stage('Build & Deploy') {
+                input(message: "Do you want to approve this build?");
+                timestamps{
+                    script{
+                        try{
+                            sh label: '', script: '''
+                                set +x
+                                cd /home/centos/
+                                mkdir -p .aws
+                                echo -e  "[default]\naws_access_key_id = "$AWS_ACCESS_KEY"\naws_secret_access_key = "$AWS_SECRET_ACCESS > .aws/credentials
+                                echo -e  "[default]\nregion = $AWS_NORTH_CALI_REGION\noutput = json" > .aws/config
+                                fullPath="/home/centos/workspace/$JOB_NAME/frontend"
+							    cd $fullPath
+
+                                BUCKET_NAME=${EVX_S3_WEBSITE_BUCKET}
+                                REGION=${AWS_NORTH_CALI_REGION}
+                                CLOUDFRONT_ID=${EVX_PRE_PROD_CLOUDFRONT_ID}
+
+                                npm install
+                                npm run build-pre-prod || exit $1
+                                echo "--------Angular Build done------------"
+
+                                #invalidating the cache
+                                aws cloudfront --region ${REGION} create-invalidation --distribution-id ${CLOUDFRONT_ID} --paths /\\*  --query Invalidation.Id > invalidation-id.txt || exit $1
+                                echo "--------Invalidating the cache started------------"
+
+                                INVALIDATION_ID=$(cat invalidation-id.txt)
+                                INVALIDATION_ID=$(sed -e 's/^"//' -e 's/"$//' <<<"$INVALIDATION_ID") ## replacing 
+
+                                aws cloudfront --region ${REGION} get-invalidation --id $INVALIDATION_ID --distribution-id ${CLOUDFRONT_ID} --query Invalidation.Status > invalidation-status.txt || exit $1
+                                echo "--------Got the invalidation status------------"
+                                echo $(cat invalidation-status.txt)
+
+                                #deleting all the old files
+                                aws s3 rm --region ${REGION} s3://${BUCKET_NAME}/ --recursive \
+                                    --exclude 'videos/*' \
+                                    --exclude 'packaged-course/*'  || exit $1
+
+                                echo "--------Old files removed------------"
+
+                                #uploading the files
+                                aws s3 cp ./dist  s3://${BUCKET_NAME}  --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers  --recursive  || exit $1
+                                echo "--------New files copied to S3------------"
+
+
+                                while [ "$(cat invalidation-status.txt)" != '"Completed"' ]
+                                do
+                                    aws cloudfront --region ${REGION} get-invalidation --id $INVALIDATION_ID --distribution-id ${CLOUDFRONT_ID} \
+                                            --query Invalidation.Status > invalidation-status.txt
+                                    echo 'Current Status:'
+                                    echo $(cat invalidation-status.txt)     
+                                    sleep 5
+                                done
+
+                                echo "--------Invalidation complete------------"
+                                rm ./invalidation-*.txt
+
+                                echo "--------Invalidation complete------------"
+                                set -x
+                            '''
+                            if ('FAILURE'.equals(currentBuild.result)) {
+                                print "Current Build failed due to SSH failure"
+                                print response
+                                //error('ssh error')
+                                throw new Exception("SSH Build error, check jenkins console for further details")
+                            }
+
+                            def emailSubject = "Jenkins Notification: EVX Pre-Prod Frontend deployment for Build ID #${env.BUILD_NUMBER} is successful"
+                            def emailBody = """
+                            <p>Hi EVX Team,</p>
+                            <p>The EVX Pre-prod Front environment has been deployed successfully, with latest version.</p>
+                            <p>To login use: https://evx-preprod.sifylivewire.com/</p>
+                            <p>With Regards,</p>
+                            <p>Sify Jenkins</p>
+                            """
+                            def recipients = APPROVERS
+                            sendEmail(emailSubject, emailBody, recipients, false);
+
+                        } catch(err){
+                            print "========Sending failure email ===================="                      
+                            def emailSubject = "Jenkins Notification: EVX Pre-Prod Frontend deployment for Build ID #${env.BUILD_NUMBER} has failed"
+                            def emailBody = """
+                            <p>Hi EVX Team,</p>
+                            <p>Your last deployment failed due to error: ${err}</p>
+                            <p>With Regards,</p>
+                            <p>Sify Jenkins</p>
+                            """
+                            def recipients = APPROVERS
+                            sendEmail(emailSubject, emailBody, recipients, false);
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    else if (params.ENVIRONMENT == 'pre-prod-backend'){
+        node('evx-pre-prod-builder'){
+            stage('Notify Approvers') {
+                cleanWs()
+                git branch: env.EVX_GIT_PRE_PROD_BRANCH, credentialsId: 'AsadSVN', url: env.EVX_GIT_REPO
+                script {					
+                    def commitDetails = fetchLastCommitInfo("");
+                    def emailSubject = "Jenkins Notification: Approve EVX pre-prod-backend Build for JOB ID #${env.BUILD_NUMBER}"
+                    def emailBody = """
+                        <p>Hi Approver,</p>
+					    <p>The EVX Team pipeline has been triggered corresponding to Git repo branch: pre-prod</p>
+					    <p>Please find the last commit details below:</p>
+					    <p>${commitDetails}</p>
+					    <p><a href="https://aws-sifyjenkins.sifylivewire.com/job/evx/job/pre-prod/job/admin-app/job/backend/${env.BUILD_NUMBER}/input">Approve this build</a></p>					   
+					    <p>See attached diff of <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b>.</p>
+                        <p>With Regards,</p>
+					    <p>Sify Jenkins Admin</p>"""
+                    def recipients = APPROVERS
+                    sendEmail(emailSubject, emailBody, recipients, true); 
+               }
+            }
+            stage('Build') {
+                input(message: "Do you want to approve this build?");
+                timestamps{
+                    script{
+                        try{
+                            nodejs('nodejs-evx-build') {
+                                sh label: '', script: '''
+                                set +x
+                                cd /home/centos/
+                                mkdir -p .aws
+                                echo -e  "[default]\naws_access_key_id = "$AWS_ACCESS_KEY"\naws_secret_access_key = "$AWS_SECRET_ACCESS > .aws/credentials
+                                echo -e  "[default]\nregion = us-west-1\noutput = json" > .aws/config
+                                fullPath="/home/centos/workspace/$JOB_NAME/backend"
+                                mv $fullPath/appspec.yml.codedeploy $fullPath/appspec.yml
+                                mv $fullPath/build/pre-prod-appspec.yml $fullPath/appspec.yml
+                                echo -e "$EVX_PREPROD_ENV_VARIABLES" > $fullPath/.env
+                                cd $fullPath/
+                                zip -q -r ${BUILD_TAG}.zip .env ./*
+                                mv $fullPath/${BUILD_TAG}.zip /home/centos/
+                                set -x
+                                '''
+                                sh label: '', script: 'aws s3 cp /home/centos/${BUILD_TAG}.zip s3://$EVX_S3_DEPLOY_BUCKET/'
+                            }
+                            if ('FAILURE'.equals(currentBuild.result)) {
+                                print "Current Build failed due to SSH failure"
+                                print response
+                                //error('ssh error')
+                                throw new Exception("SSH Build error, check jenkins console for further details")
+                            }
+
+                        } catch(err){
+                            print "========Sending failure email ===================="                  
+                            def emailSubject = "Jenkins Notification: EVX Pre-Prod Backend deployment for Build ID #${env.BUILD_NUMBER} has failed"
+                            def emailBody = """
+                            <p>Hi EVX Team,</p>
+                            <p>Your last deployment failed due to error: ${err}</p>
+                            <p>With Regards,</p>
+                            <p>Sify Jenkins</p>
+                            """
+                            def recipients = APPROVERS
+                            sendEmail(emailSubject, emailBody, recipients, false);
+                        }
+
+                    }
+                }
+            }
+            stage('Deploy') {
+                input(message: "Do you want to approve this deployment?");
+                timestamps{
+                    script{
+                        try{
+                            nodejs('nodejs-evx-build') {
+                                sh label: '', script: '''
+                                    set +x
+                                    cd /home/centos/
+                                    mkdir -p .aws
+                                    echo -e  "[default]\naws_access_key_id = "$AWS_ACCESS_KEY"\naws_secret_access_key = "$AWS_SECRET_ACCESS > .aws/credentials
+                                    echo -e  "[default]\nregion = us-west-1\noutput = json" > .aws/config'''
+                                sh label: '', script: 'aws deploy create-deployment --region $AWS_NORTH_CALI_REGION --file-exists-behavior OVERWRITE --application-name evx-pre-prod --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name evx-pre-prod-dep-group --s3-location bucket=$EVX_S3_DEPLOY_BUCKET,bundleType=zip,key=${BUILD_TAG}.zip  --output text > deploy.txt'
+                                sh label: '', script: 'echo $(cat deploy.txt)'
+                                sh label: '', script: 'echo $(aws deploy wait --region $AWS_LW_ENV_REGION deployment-successful --deployment-id $(cat deploy.txt))'
+                                sh label: '', script: '''echo "\\"InProgress"\\" > result.txt
+                                    set -x
+                                    while [ "$(cat result.txt)" != "\\"Succeeded"\\" ]
+                                    do
+                                    aws deploy get-deployment  --region $AWS_NORTH_CALI_REGION --deployment-id $(cat deploy.txt) --query \'deploymentInfo.status\' > result.txt
+                                    
+                                    echo $(cat result.txt)
+
+                                    if [[ "$(cat result.txt)" == "\\"Failed"\\" ]] ; then
+                                        echo "exit"
+                                        cd /home/centos/
+                                        rm -rf .aws
+                                        exit 1
+                                    fi
+                                    if [[ "$(cat result.txt)" == "\\"Stopped"\\" ]] ; then
+                                        echo "exit"
+                                        cd /home/centos/
+                                        rm -rf .aws
+                                        exit 1
+                                    fi
+                                    
+                                    sleep 5
+                                    done
+                                    cd /home/centos/
+                                    rm -rf .aws
+                                    '''
+                                }
+                        }catch(err){
+                            print "========Sending failure email ===================="                  
+                            def emailSubject = "Jenkins Notification: EVX Pre-Prod Backend deployment for Build ID #${env.BUILD_NUMBER} has failed"
+                            def emailBody = """
+                            <p>Hi EVX Team,</p>
+                            <p>Your last deployment failed due to error: ${err}</p>
+                            <p>With Regards,</p>
+                            <p>Sify Jenkins</p>
+                            """
+                            def recipients = APPROVERS
+                            sendEmail(emailSubject, emailBody, recipients, false);
+
+                        }
+                        
+                    }
+                }
+            }
+        }
+    }
+}
