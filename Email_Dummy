@@ -45,7 +45,7 @@ def JOB_NAME = "${env.JOB_NAME}"
 			   def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
 			   script{
 			       sh(returnStdout: true, script: 'cd /var/lib/jenkins/workspace/')
-				   env.workspace=pwd
+				   env.workspace = sh(returnStdout: true, script: 'pwd')
 				   println(env.workspace)
 			   }
 			   
