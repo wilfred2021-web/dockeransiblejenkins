@@ -77,6 +77,5 @@ def Commit_Id = "${env.commit_Id}"
                         """
                         def recipients = TESTERS
                         sendEmail(emailSubject, emailBody, recipients, false);
-                    }            
-		
-				
+						"""
+                    }
