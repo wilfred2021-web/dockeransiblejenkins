@@ -37,15 +37,13 @@ println(changes.getEscapedDiff())
 /** config*/
 def TESTERS = "${env.TEST_USER}"
 def JOB_NAME = "${env.JOB_NAME}"
-def Commit_Id = "${env.commit_Id}"
+
 
     /** Pipeline steps begin **/
 
       try{
 	  		stage('Notify All') {
-			env.WORKSPACE = pwd()
-			def version = readFile "${env.WORKSPACE}/version.txt"
-            def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
+			   def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
                     def emailBody = """
                         <p>Hi Devops Team,</p>
                         <p>Jenkins File Deployment Process for mail_notification is Success : 
@@ -66,10 +64,7 @@ def Commit_Id = "${env.commit_Id}"
                         def emailBody = """
                         <p>Hi Testing Team,</p>
                         <p>Your last deployment failed due to error: ${err}</p>
-						<p>Commit Id: <b>${env.GIT_COMMIT_ID}</p>
-					<p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
-					<p>Date: ${env.GIT_COMMIT_DATE}</p>
-                        <p>With Regards,</p>
+						<p>With Regards,</p>
                         <p>Sify Jenkins</p>
                         """
                         def recipients = TESTERS
