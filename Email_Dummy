@@ -2,7 +2,7 @@
 def sendEmail(emailSubject, emailBody, recipients, hasAttachment) {
     print '...........................Sending Email..................................'    
     if(hasAttachment){
-        emailext (subject: emailSubject, attachmentsPattern: '**/*.diff',  mimeType: 'text/html', body: emailBody, to: recipients);
+        emailext (subject: emailSubject, attachmentsPattern: '**/*.txt',  mimeType: 'text/html', body: emailBody, to: recipients);
     } else {
         emailext (subject: emailSubject, mimeType: 'text/html', body: emailBody, to: recipients);
     }
