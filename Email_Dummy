@@ -9,7 +9,7 @@ pipeline {
 
 ##To read file from workspace which will contain the Jenkins Job Name ###
            
-     def filePath = readFile "${WORKSPACE}/ D:\Devproject"                   
+     def filePath = readFile "${WORKSPACE}/D:\Devproject"                   
 
 ##To read file line by line ###
  
