@@ -66,6 +66,9 @@ def Commit_Id = "${env.commit_Id}"
                         def emailBody = """
                         <p>Hi Testing Team,</p>
                         <p>Your last deployment failed due to error: ${err}</p>
+						<p>Commit Id: <b>${env.GIT_COMMIT_ID}</p>
+					<p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
+					<p>Date: ${env.GIT_COMMIT_DATE}</p>
                         <p>With Regards,</p>
                         <p>Sify Jenkins</p>
                         """
