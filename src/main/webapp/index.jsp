@@ -1,7 +1,7 @@
 <form action="action_page.php">
   <div class="container">
     <h1>Indian Cricket best all rounder....</h1>]
-    <p> Yuvaraj Singh All rounder in indain cricket team .....</p> 
+    <p> The Lengend Kapil is a wrold class best all rounder</p> 
     <hr>
      
     <label for="Name"><b>Enter Name</b></label>
