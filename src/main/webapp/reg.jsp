@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Sachin God Of Cricket</title>
+  <title>Om Nama Sivaaya</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -11,7 +11,7 @@
 <body>
 
 <div class="container-fluid">
-  <h1 style="color:red;">DEVOPS DONE SUCCESSFULLY.....</h1>
+  <h1 style="color:red;">Sanjai DONE SUCCESSFULLY.....</h1>
 </div>
 
 </body>
