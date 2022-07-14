@@ -1,6 +1,6 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>Indian Cricket best all rounder....</h1>]
+    <h1>Indian Cricket best Indian Captain 1983 </h1>]
     <p> The Lengend Kapil is a wrold class best all rounder DON</p> 
     <hr>
      
