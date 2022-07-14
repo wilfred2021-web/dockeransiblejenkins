@@ -1,0 +1,85 @@
+/** Function to send Email*/
+def sendEmail(emailSubject, emailBody, recipients, hasAttachment) {
+    print '...........................Sending Email..................................'    
+    if(hasAttachment){
+        emailext (subject: emailSubject, attachmentsPattern: '**/*.txt',  mimeType: 'text/html', body: emailBody, to: recipients);
+    } else {
+        emailext (subject: emailSubject, mimeType: 'text/html', body: emailBody, to: recipients);
+    }
+}
+
+node {
+
+      stage("checkout") {
+        git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git'
+      }
+stage("last-changes") {
+def publisher = LastChanges.getLastChangesPublisher "PREVIOUS_REVISION", "SIDE", "LINE", true, true, "", "", "", "", ""
+publisher.publishLastChanges()
+def changes = publisher.getLastChanges()
+println(changes.getEscapedDiff())
+	script{
+		for (commit in changes.getCommits()) {
+			for(cmt in commit){
+				println(">>>"+cmt);
+			}
+			env.GIT_COMMIT_AUTHOR = sh(returnStdout: true, script: 'git log -3 --format="%ae"').trim()
+			env.GIT_COMMIT_ID = sh(returnStdout: true, script: 'git log -3 --format="%h"').trim()
+			env.GIT_COMMIT_DATE = sh(returnStdout: true, script: 'git log -3 --graph --pretty=format:"%cd"').trim()
+		}
+		
+
+	   
+
+			 
+		def diff = sh(returnStdout: true, script: 'git show -n 3')
+		
+		sh(returnStdout: true, script: 'cd /var/lib/jenkins/workspace/')
+	    env.SourcePATH = sh(returnStdout: true, script: 'pwd')
+		diff += "SOURCE PATH: "+env.SourcePATH
+		
+        writeFile file: 'build.txt', text: diff    
+ 	}
+     
+}
+
+/** config*/
+def TESTERS = "${env.TEST_USER}"
+def JOB_NAME = "${env.JOB_NAME}"
+
+
+    /** Pipeline steps begin **/
+
+      try{
+	  		stage('Notify All') {
+			   def emailSubject = "Jenkins Notification: Trigger for Docker Ansible Build ID #${BUILD_NUMBER}";
+			  
+			   
+                    def emailBody = """
+                        <p>Hi Devops Team,</p>
+                        <p>Jenkins File Deployment Process for mail_notification is Success : 
+                        <p>Please find the last commit details below:</p>
+                        <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
+				  	<p>Commit Id: <b>${env.GIT_COMMIT_ID}</b></p>
+					<p>Source Path: <b>${env.SourcePATH}</b></p>
+					<p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
+					<p>Date: ${env.GIT_COMMIT_DATE}</p>
+                    <p>With Regards,</p>
+                    <p>Sify Jenkins Admin</p>"""
+                    def recipients = TESTERS
+                    sendEmail(emailSubject, emailBody, recipients, true);
+			   }
+			}							
+		catch(err) {
+                        print "========Sending failure email ===================="                      
+                        def emailSubject = "Jenkins Notification: Mail Notification for Build ID #${BUILD_NUMBER} has failed"
+                        def emailBody = """
+                        <p>Hi Testing Team,</p>
+                        <p>Your last deployment failed due to error: ${err}</p>
+						<p>With Regards,</p>
+                        <p>Sify Jenkins</p>
+                        """
+                        def recipients = TESTERS
+                        sendEmail(emailSubject, emailBody, recipients, false);
+					}
+					}
