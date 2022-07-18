@@ -1,7 +1,7 @@
 t!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Testing mail for devops/title>
+  <title>Testing mail for demo</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -11,7 +11,7 @@ t!DOCTYPE html>
 <body>
 
 <div class="container-fluid">
-  <h1 style="color:red;">Changes DONE 12.....</h1>
+  <h1 style="color:red;">Changes DONE 777</h1>
 </div>
 
 </body>
