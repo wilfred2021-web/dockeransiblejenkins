@@ -1,7 +1,7 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>Devops for learning </h1>]
-    <p> Last Three commit with mail notification</p> 
+    <h1>Devops for learning </h1>
+    <p> Last Three commit was successful</p> 
     <hr>
      
     <label for="Name"><b>Enter Name</b></label>
