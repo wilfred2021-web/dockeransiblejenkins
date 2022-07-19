@@ -1,0 +1,202 @@
+/** Function to send Email*/
+def sendEmail(emailSubject, emailBody, recipients, hasAttachment) {
+    print '...........................Sending Email..................................'    
+    if(hasAttachment){
+        emailext (subject: emailSubject, attachmentsPattern: '**/*.txt',  mimeType: 'text/html', body: emailBody, to: recipients);
+    } else {
+        emailext (subject: emailSubject, mimeType: 'text/html', body: emailBody, to: recipients);
+    }
+}
+
+pipeline{
+    agent any
+   
+    tools {
+      maven 'maven 3.8.5'
+    }
+    
+    environment {
+      Docker_TAG = getversion()
+    }
+    stages {
+
+    stage("checkout") {
+        steps{
+            script {
+                git url: 'https://github.com/nrBaskar/dockeransiblejenkins.git', branch: 'master'
+            }
+        }
+    }
+    stage("last-changes") {
+        steps{
+                script{
+                
+                    env.GIT_COMMIT_AUTHOR = sh(returnStdout: true, script: 'git log -3 --format="%ae"').trim()
+                    env.GIT_COMMIT_ID = sh(returnStdout: true, script: 'git log -3 --format="%h"').trim()
+                    env.GIT_COMMIT_DATE = sh(returnStdout: true, script: 'git log -3 --graph --pretty=format:"%cd"').trim()
+                             
+                    def diff = sh(returnStdout: true, script: 'git show -n 3')
+                    sh(returnStdout: true, script: 'cd /var/lib/jenkins/workspace/')
+                    env.SourcePATH = sh(returnStdout: true, script: 'pwd')
+                    diff += "SOURCE PATH: "+env.SourcePATH
+                    
+                    writeFile file: 'build.txt', text: diff    
+                }
+        }
+           
+    }
+    stage('Maven Build'){
+        steps{
+            sh "mvn clean package"
+        }
+    }
+    stage('Docker Build'){
+        steps{
+		dockerstatus()
+            sh "docker build . -t nrbaskar/hariapp:${Docker_TAG}"
+        }
+    }
+    stage('Dockerhub Push'){
+        steps{
+		
+            withCredentials([string(credentialsId: 'docker-hub', variable: 'dockerHubPwd')]) {
+                sh "docker login -u nrbaskar -p ${dockerHubPwd}"
+            }
+            
+            sh "docker push nrbaskar/hariapp:${Docker_TAG}"
+        }
+    }
+
+	stage('Notify All') {
+        steps{
+            script{
+
+                try {
+
+                    def emailSubject = "Development pipeline triggered for Build ID #${BUILD_NUMBER}";
+                    def emailBody = """
+                        <p>Hi Devops Team,</p>
+                        <p>Jenkins File Deployment Process for mail_notification is Success : 
+                        <p>Please find the last commit details below:</p>
+                        <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
+                    <p>Commit Id: <b>${env.GIT_COMMIT_ID}</b></p>
+                    <p>Source Path: <b>${env.SourcePATH}</b></p>
+                    <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
+                    <p>Date: ${env.GIT_COMMIT_DATE}</p>
+                    <p>With Regards,</p>
+                    <p>Sify Jenkins Admin</p>"""
+                    def recipients = TESTERS
+                    sendEmail(emailSubject, emailBody, recipients, true);
+                }catch(err) {
+                    print "========Sending failure email ===================="                      
+                    def emailSubject = "Jenkins Notification: Mail Notification for Build ID #${BUILD_NUMBER} has failed"
+                    def emailBody = """
+                    <p>Hi Testing Team,</p>
+                    <p>Your last deployment failed due to error: ${err}</p>
+                    <p>With Regards,</p>
+                    <p>Sify Jenkins</p>
+                    """
+                    def recipients = TESTERS
+                    sendEmail(emailSubject, emailBody, recipients, false);
+                }
+            }
+		   }
+        }     
+        stage('Staging server'){
+            steps{
+                ansiblePlaybook credentialsId: 'dev-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'dev.inv', playbook: 'deploy-docker.yml'
+                
+            }
+        }
+	stage('Build & Deploy') {
+        steps{
+            script{
+
+                try {
+
+                    def emailSubject = "Jenkins Notification: Build Trigger for Staging Server Build ID #${BUILD_NUMBER}";
+                    def emailBody = """
+                        <p>Hi Devops Team,</p>
+                        <p>Jenkins File Deployment Process for mail_notification is Success : 
+                        <p>Please find the last commit details below:</p>
+                        <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
+                    <p>Commit Id: <b>${env.GIT_COMMIT_ID}</b></p>
+                    <p>Source Path: <b>${env.SourcePATH}</b></p>
+                    <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
+                    <p>Date: ${env.GIT_COMMIT_DATE}</p>
+                    <p>With Regards,</p>
+                    <p>Sify Jenkins Admin</p>"""
+                    def recipients = TESTERS
+                    sendEmail(emailSubject, emailBody, recipients, true);
+                }catch(err) {
+                    print "========Sending failure email ===================="                      
+                    def emailSubject = "Jenkins Notification: Mail Notification for Build ID #${BUILD_NUMBER} has failed"
+                    def emailBody = """
+                    <p>Hi Testing Team,</p>
+                    <p>Your last deployment failed due to error: ${err}</p>
+                    <p>With Regards,</p>
+                    <p>Sify Jenkins</p>
+                    """
+                    def recipients = TESTERS
+                    sendEmail(emailSubject, emailBody, recipients, false);
+                }
+            }
+		   }
+        }     
+		
+		stage('Testing server'){
+            steps{
+                ansiblePlaybook credentialsId: 'testing-server', disableHostKeyChecking: true, extras: "-e DOCKER_TAG=${Docker_TAG}", installation: 'ansible', inventory: 'test.inv', playbook: 'deploy_test.yml'
+                
+            }
+        }
+	stage('Test & Deploy') {
+        steps{
+            script{
+
+                try {
+
+                    def emailSubject = "Jenkins Notification: Build Trigger for Testing Server Build ID #${BUILD_NUMBER}";
+                    def emailBody = """
+                        <p>Hi Devops Team,</p>
+                        <p>Jenkins File Deployment Process for mail_notification is Success : 
+                        <p>Please find the last commit details below:</p>
+                        <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
+                    <p>Commit Id: <b>${env.GIT_COMMIT_ID}</b></p>
+                    <p>Source Path: <b>${env.SourcePATH}</b></p>
+                    <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
+                    <p>Date: ${env.GIT_COMMIT_DATE}</p>
+                    <p>With Regards,</p>
+                    <p>Sify Jenkins Admin</p>"""
+                    def recipients = TESTERS
+                    sendEmail(emailSubject, emailBody, recipients, true);
+                }catch(err) {
+                    print "========Sending failure email ===================="                      
+                    def emailSubject = "Jenkins Notification: Mail Notification for Build ID #${BUILD_NUMBER} has failed"
+                    def emailBody = """
+                    <p>Hi Testing Team,</p>
+                    <p>Your last deployment failed due to error: ${err}</p>
+                    <p>With Regards,</p>
+                    <p>Sify Jenkins</p>
+                    """
+                    def recipients = TESTERS
+                    sendEmail(emailSubject, emailBody, recipients, false);
+                }
+            }
+		   }
+        }     
+    }
+}
+		
+
+def getversion(){
+
+    def commithash = sh(returnStdout: true, script: 'git rev-parse --short HEAD')
+    echo commithash
+    return commithash
+    
+}
+def dockerstatus() {
+
+    sh "sudo service docker start"
+}
