@@ -2,7 +2,8 @@
 - hosts: dockerhost
   become: True
   tasks:
-    - name: Install python pip1
+    - name: Install python pip
+    =;
       yum:
         name: python-pip
         state: present
