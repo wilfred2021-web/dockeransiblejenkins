@@ -144,7 +144,7 @@ pipeline{
                     becomeUser: null, 
                     colorized: false,
                     installation: 'ansible',
-                    credentialsId: 'uat-server',
+                    credentialsId: 'uat1-server',
                     disableHostKeyChecking: true,
                     forks: 50,
                     hostKeyChecking: false,
