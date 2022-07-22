@@ -245,7 +245,7 @@ def DeployNotification(){
         <p>Source Path: <b>${env.SourcePATH}</b></p>
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
-		<p>Staging URL - http://54.208.82.224:8083/webapp/index.jsp </b></p>
+		<p>Staging URL - http://50.19.184.63:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
         <p>${env.testing_log}</p><br> 
@@ -268,10 +268,10 @@ def DeployNotification(){
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
 		<p>Staging Deployment- <b>${stage_status}</b></p>
-		<p>Staging URL - http://54.208.82.224:8083/webapp/index.jsp </b></p>
+		<p>Staging URL - http://50.19.184.63:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
-		<p>Testing URL - http://50.19.185.50:8085/webapp/index.jsp </b></p>
+		<p>Testing URL - http://34.203.199.61:8085/webapp/index.jsp </b></p>
         <p>${env.testing_log}</p><br> 
         <p>UAT Deployment- <b>${uat_status}</b></p>
         <p>${env.uat_log}</p><br> 
@@ -294,13 +294,13 @@ def DeployNotification(){
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
         <p>Staging Deployment- <b>${stage_status}</b></p>
-        <p>Staging URL - http://54.208.82.224:8083/webapp/index.jsp </b></p>
+        <p>Staging URL - http://50.19.184.63:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
-        <p>Testing URL - http://50.19.185.50:8085/webapp/index.jsp </b></p>
+        <p>Testing URL - http://34.203.199.61:8085/webapp/index.jsp </b></p>
         <p>${env.testing_log}</p><br>  
         <p>UAT Deployment- <b>${uat_status}</b></p>
-        <p>UAT URL - http://3.80.79.104:8087/webapp/index.jsp </b></p>
+        <p>UAT URL - http://54.197.165.168:8087/webapp/index.jsp </b></p>
         <p>${env.uat_log}</p><br> 
     
         <p>With Regards,</p>
