@@ -146,9 +146,9 @@ pipeline{
 	        <p>Hi UAT Team,</p>
 	        <strong>"UAT Deployment for Build ID #${BUILD_NUMBER} is waiting for your Approval"</strong>
 	        <p>A build has been initiated in the UAT. We will let you know once the deployment is successful.</p>
-	        <p>To browse Jenkins URL: http://18.212.49.103:8080</p>
+	        <p>To browse Jenkins URL: http://34.229.0.210:8080</p>
 	        <p>Staging Deployment- <b>${stage_status}</b></p>
-            <p>Staging URL - http://54.227.16.102:8083/webapp/index.jsp </b></p>
+            <p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
             <p>${env.staging_logs}</p><br>
             <p>Testing Deployment- <b>${test_status}</b></p>
             <p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
@@ -210,9 +210,9 @@ pipeline{
 	        <p>Hi POD Team,</p>
 	        <strong>"Production Deployment for Build ID #${BUILD_NUMBER} is waiting for your Approval"</strong>
 	        <p>A build has been initiated in the Production. We will let you know once the deployment is successful.</p>
-	        <p>To browse Jenkins URL: http://18.212.49.103:8080</p>
+	        <p>To browse Jenkins URL: http://34.229.0.210:8080</p>
 	        <p>Production Deployment- <b>${stage_status}</b></p>
-            <p>Production URL - http://54.227.16.102:8083/webapp/index.jsp </b></p>
+            <p>Production URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
             <p>${env.staging_logs}</p><br>
             <p>Testing Deployment- <b>${test_status}</b></p>
             <p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
@@ -265,7 +265,7 @@ pipeline{
             }
         }
     }
-    }
+  }
     post {
         success{
             script{                
@@ -313,7 +313,7 @@ def DeployNotification(){
         <p>Hi Staging Dev Team,</p>
         <p>"Staging Deployment for Build ID #${BUILD_NUMBER} is successful"
         <p>The Staging development environment has been deployed successfully, with latest version.</p>
-        <p>To browse use: http://54.227.16.102:8083/webapp/index.jsp</p>
+        <p>To browse use: http://34.229.0.210:8083/webapp/index.jsp</p>
         <p>Please find the last commit details below:</p>
         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
         <p>Commit Id: <b>${env.GIT_COMMIT_ID}</b></p>
@@ -322,14 +322,13 @@ def DeployNotification(){
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
         <p>Staging Deployment- <b>${stage_status}</b></p>
         <p>${env.staging_logs}</p><br>
-     
         <p>With Regards,</p>
         <p>Sify Jenkins Admin</p>"""
 
         def recipients = TESTERS
         sendEmail(emailSubject, emailBody, recipients, true);
+		
     }else if(test_status != 'Success'){
-
         def emailSubject = "Jenkins Notification: Build Failure for Testing Server Build ID #${BUILD_NUMBER}";
         
         def emailBody = """
@@ -341,7 +340,7 @@ def DeployNotification(){
         <p>Source Path: <b>${env.SourcePATH}</b></p>
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
-		<p>Staging URL - http://54.227.16.102:8083/webapp/index.jsp </b></p>
+		<p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
         <p>${env.testing_log}</p><br> 
@@ -350,8 +349,8 @@ def DeployNotification(){
 
         def recipients = TESTERS
         sendEmail(emailSubject, emailBody, recipients, true);
+		
     }else if(uat_status != 'Success'){
-
         def emailSubject = "Jenkins Notification: Build Failure for UAT Server Build ID #${BUILD_NUMBER}";
         
         def emailBody = """
@@ -364,7 +363,7 @@ def DeployNotification(){
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
 		<p>Staging Deployment- <b>${stage_status}</b></p>
-		<p>Staging URL - http://54.227.16.102:8083/webapp/index.jsp </b></p>
+		<p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
 		<p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
@@ -376,8 +375,8 @@ def DeployNotification(){
 
         def recipients = TESTERS
         sendEmail(emailSubject, emailBody, recipients, true);
+		
 	}else if(pod_status != 'Success'){
-
         def emailSubject = "Jenkins Notification: Build Failure for Production Server Build ID #${BUILD_NUMBER}";
         
         def emailBody = """
@@ -390,7 +389,7 @@ def DeployNotification(){
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
 		<p>Staging Deployment- <b>${stage_status}</b></p>
-		<p>Staging URL - http://54.227.16.102:8083/webapp/index.jsp </b></p>
+		<p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
 		<p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
@@ -419,7 +418,7 @@ def DeployNotification(){
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
         <p>Staging Deployment- <b>${stage_status}</b></p>
-        <p>Staging URL - http://54.227.16.102:8083/webapp/index.jsp </b></p>
+        <p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
         <p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
