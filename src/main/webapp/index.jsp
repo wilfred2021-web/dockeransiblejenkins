@@ -28,7 +28,7 @@
     <button type="submit" class="registerbtn">Register</button>
   </div>
   <div class="container signin">
-    <p>Already have an account? <a href="#">Sign into your account</a>.</p>
+    <p>Do you already have an account? <a href="#">Sign into your account</a>.</p>
   </div>
 
    <h1> Learning JENKINS pipeline </h1>
