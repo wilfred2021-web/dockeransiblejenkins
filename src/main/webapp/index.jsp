@@ -31,7 +31,7 @@
     <p>Already have an account? <a href="#">Sign into your account</a>.</p>
   </div>
 
-   <h1> Welcome All, Happy Learning for Denis </h1>
+   <h1> Learning CI CD pipeline </h1>
 
   
 </form>
