@@ -1,6 +1,6 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>Devops for learning </h1>
+    <h1>Devops for learning and skill developing</h1>
     <p> Last Three commit was Done successful</p> 
     <hr>
      
