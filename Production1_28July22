@@ -353,7 +353,8 @@ def DeployNotification(){
 
         def recipients = TESTERS
         sendEmail(emailSubject, emailBody, recipients, true);
-	}else if(uat_status == 'Success'){
+		
+	}else if(uat_status != 'Success'){
         def emailSubject = "Jenkins Notification: Build Successfully Deployed for UAT Server Build ID #${BUILD_NUMBER}";
         
         def emailBody = """
@@ -407,7 +408,7 @@ def DeployNotification(){
         <p>Sify Jenkins Admin</p>"""
 
         def recipients = TESTERS
-        sendEmail(emailSubject, emailBody, recipients, true);
+
    }else{
         
         def emailSubject = "Jenkins Notification: Build Success for Staging,Testing,UAT and Production Server Build ID #${BUILD_NUMBER}";
