@@ -20,6 +20,7 @@ pipeline{
       stage_status = "Failure"
       test_status = "Failure"
       uat_status = "Failure"
+	  pod_status = "Failure"
     }
     stages {
 
@@ -146,12 +147,12 @@ pipeline{
 	        <p>Hi UAT Team,</p>
 	        <strong>"UAT Deployment for Build ID #${BUILD_NUMBER} is waiting for your Approval"</strong>
 	        <p>A build has been initiated in the UAT. We will let you know once the deployment is successful.</p>
-	        <p>To browse Jenkins URL: http://34.229.0.210:8080</p>
+	        <p>To browse Jenkins URL: http://18.205.115.65:8080 </p>
 	        <p>Staging Deployment- <b>${stage_status}</b></p>
-            <p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
+            <p>Staging URL - http://52.91.130.201:8083/webapp/index.jsp </b></p>
             <p>${env.staging_logs}</p><br>
             <p>Testing Deployment- <b>${test_status}</b></p>
-            <p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
+            <p>Testing URL - http://18.234.109.9:8085/webapp/index.jsp </b></p>
              <p>${env.testing_log}</p><br>  
             <p>Source Path: <b>${env.SourcePATH}</b></p>
 	        <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
@@ -205,18 +206,21 @@ pipeline{
 		steps{
             script{	
 			
-			def emailSubject = "Jenkins Notification: Build Approval for Production Deployment Build ID #${BUILD_NUMBER}";
+			def emailSubject = "Jenkins Notification: Build successfully deployed for UAT server and waiting Approval for Production Deployment Build ID #${BUILD_NUMBER}";
 			def emailBody = """
 	        <p>Hi POD Team,</p>
 	        <strong>"Production Deployment for Build ID #${BUILD_NUMBER} is waiting for your Approval"</strong>
 	        <p>A build has been initiated in the Production. We will let you know once the deployment is successful.</p>
-	        <p>To browse Jenkins URL: http://34.229.0.210:8080</p>
-	        <p>Production Deployment- <b>${stage_status}</b></p>
-            <p>Production URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
+	        <p>To browse Jenkins URL: http://18.205.115.65:8080 </p>
+	        <p>Staging Deployment- <b>${stage_status}</b></p>
+            <p>Staging URL - http://52.91.130.201:8083/webapp/index.jsp </b></p>
             <p>${env.staging_logs}</p><br>
             <p>Testing Deployment- <b>${test_status}</b></p>
-            <p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
-             <p>${env.testing_log}</p><br>  
+            <p>Testing URL - http://18.234.109.9:8085/webapp/index.jsp </b></p>
+            <p>${env.testing_log}</p><br> 
+			<p>UAT Deployment- <b>${uat_status}</b></p>
+            <p>UAT URL - http://3.89.62.155:8087/webapp/index.jsp </b></p>
+			<p>${env.uat_log}</p><br> 			 
             <p>Source Path: <b>${env.SourcePATH}</b></p>
 	        <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
 	        <p>Date: ${env.GIT_COMMIT_DATE}</p>
@@ -243,7 +247,7 @@ pipeline{
                     forks: 50,
                     hostKeyChecking: false,
                     inventory: 'pod.inv',
-                    playbook: 'deploy_pod.yml', 
+                    playbook: 'deploy-pod.yml', 
                     sudoUser: null,
                     extras: "-e DOCKER_TAG=${Docker_TAG}"
                 ) //ansiblePlaybook
@@ -313,7 +317,7 @@ def DeployNotification(){
         <p>Hi Staging Dev Team,</p>
         <p>"Staging Deployment for Build ID #${BUILD_NUMBER} is successful"
         <p>The Staging development environment has been deployed successfully, with latest version.</p>
-        <p>To browse use: http://34.229.0.210:8083/webapp/index.jsp</p>
+        <p>To browse use: http://52.91.130.201:8083/webapp/index.jsp</p>
         <p>Please find the last commit details below:</p>
         <p>See attached diff of <b>${env.JOB_NAME} #${BUILD_NUMBER}</b>.</p>
         <p>Commit Id: <b>${env.GIT_COMMIT_ID}</b></p>
@@ -340,7 +344,7 @@ def DeployNotification(){
         <p>Source Path: <b>${env.SourcePATH}</b></p>
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
-		<p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
+		<p>Staging URL - http://52.91.130.201:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
         <p>${env.testing_log}</p><br> 
@@ -363,10 +367,10 @@ def DeployNotification(){
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
 		<p>Staging Deployment- <b>${stage_status}</b></p>
-		<p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
+		<p>Staging URL - http://52.91.130.201:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
-		<p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
+		<p>Testing URL - http://18.234.109.9:8085/webapp/index.jsp </b></p>
         <p>${env.testing_log}</p><br> 
         <p>UAT Deployment- <b>${uat_status}</b></p>
         <p>${env.uat_log}</p><br> 
@@ -389,13 +393,13 @@ def DeployNotification(){
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
 		<p>Staging Deployment- <b>${stage_status}</b></p>
-		<p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
+		<p>Staging URL - http://52.91.130.201:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
-		<p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
+		<p>Testing URL - http://18.234.109.9:8085/webapp/index.jsp </b></p>
         <p>${env.testing_log}</p><br> 
         <p>UAT Deployment- <b>${uat_status}</b></p>
-		<p>UAT URL - http://34.229.0.210:8087/webapp/index.jsp </b></p>
+		<p>UAT URL - http://3.89.62.155:8087/webapp/index.jsp </b></p>
         <p>${env.uat_log}</p><br> 
 		<p>Production Deployment- <b>${pod_status}</b></p>
         <p>${env.pod_log}</p><br> 
@@ -417,17 +421,17 @@ def DeployNotification(){
         <p>Source Path: <b>${env.SourcePATH}</b></p>
         <p>Author: ${env.GIT_COMMIT_AUTHOR}</p>
         <p>Date: ${env.GIT_COMMIT_DATE}</p>
-        <p>Staging Deployment- <b>${stage_status}</b></p>
-        <p>Staging URL - http://34.229.0.210:8083/webapp/index.jsp </b></p>
+       <p>Staging Deployment- <b>${stage_status}</b></p>
+		<p>Staging URL - http://52.91.130.201:8083/webapp/index.jsp </b></p>
         <p>${env.staging_logs}</p><br>
         <p>Testing Deployment- <b>${test_status}</b></p>
-        <p>Testing URL - http://34.229.0.210:8085/webapp/index.jsp </b></p>
-        <p>${env.testing_log}</p><br>  
+		<p>Testing URL - http://18.234.109.9:8085/webapp/index.jsp </b></p>
+        <p>${env.testing_log}</p><br> 
         <p>UAT Deployment- <b>${uat_status}</b></p>
-        <p>UAT URL - http://34.229.0.210:8087/webapp/index.jsp </b></p>
+		<p>UAT URL - http://3.89.62.155:8087/webapp/index.jsp </b></p>
         <p>${env.uat_log}</p><br> 
 		<p>Production Deployment- <b>${pod_status}</b></p>
-		<p>Productioon URL - http://34.229.0.210:8088/webapp/index.jsp </b></p>
+		<p>Productioon URL - http://54.147.176.50:8088/webapp/index.jsp </b></p>
         <p>${env.pod_log}</p><br> 
         <p>With Regards,</p>
         <p>Sify Jenkins Admin</p>"""
