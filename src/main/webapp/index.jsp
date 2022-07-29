@@ -31,7 +31,7 @@
     <p>Do you already have an account?What do you think? <a href="#">Do you want to Sign into your account</a>.</p>
   </div>
 
-   <h1> Learning JENKINS pipeline </h1>
+   <h1> Learning pipeline scripts</h1>
 
   
 </form>
