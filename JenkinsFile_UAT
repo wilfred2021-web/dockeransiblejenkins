@@ -137,7 +137,6 @@ pipeline{
             }
         }
     }
-    }
     stage('uat server'){
          steps{
             script{
@@ -173,7 +172,8 @@ pipeline{
             }
         }
     }
-    }
+}
+}
     post {
         success{
             script{                
