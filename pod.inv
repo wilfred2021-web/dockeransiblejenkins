@@ -1,3 +1,2 @@
 [pod]
 172.31.25.214 ansible_user=ec2-user
-172.31.22.33 ansible_user=ec2-user
