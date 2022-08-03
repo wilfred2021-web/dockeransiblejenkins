@@ -240,7 +240,7 @@ pipeline{
         } //failure
         aborted{
             script{  
-                if(uat_status != "Success"){
+                if(test_status != "Success"){
                     RejectedBuildNotification('TESTING')
                 }else if(uat_status != "Success"){
                     RejectedBuildNotification('UAT')
