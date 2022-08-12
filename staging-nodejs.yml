@@ -35,3 +35,7 @@
         name: nodejs
         state: started
         enabled: yes
+    - name: Install npm
+      yum:
+        name: npm
+        state: present
