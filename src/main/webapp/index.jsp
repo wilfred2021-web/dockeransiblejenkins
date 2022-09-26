@@ -1,7 +1,7 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>Devops for learning and skill developing</h1>
-    <p> Last Three commit was Done successful</p> 
+    <h1>Devops for learning and skill developing course</h1>
+    <p> Successfully commited</p> 
     <hr>
      
     <label for="Name"><b>Enter Name</b></label>
