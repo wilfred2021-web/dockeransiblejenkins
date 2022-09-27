@@ -1,6 +1,6 @@
 <form action="action_page.php">
   <div class="container">
-    <h1>Devops for learning and skill developing course</h1>
+    <h1>Devops paid learning courses </h1>
     <p> Successfully commited</p> 
     <hr>
      
@@ -28,7 +28,7 @@
     <button type="submit" class="registerbtn">Register</button>
   </div>
   <div class="container signin">
-    <p>Do you already have an account?What do you think? <a href="#">Do you want to Sign into your account</a>.</p>
+    <p>Register Successfully <a href="#">Account Activated</a>.</p>
   </div>
 
    <h1> Learning pipeline scripts</h1>
