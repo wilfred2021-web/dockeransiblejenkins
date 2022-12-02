@@ -1,0 +1,32 @@
+1.Download sonarqube for windows 8.9.10
+2.Download java jdk 11 
+3.set JAVA_Home and path variable in environment variables
+user variable
+JAVA_HOME C:\Program Files\Java\jdk-11.0.16.1
+system variabe
+path C:\Program Files\Java\jdk-11.0.16.1\bin
+4.run localhost:9000 and login as default credentials
+admin and admin and change password to sify@123
+5.Generate token by adding add project
+
+6.Download and Install jenkins in another server
+7.install java 11 in this server
+8.install sonarqube scanner plugin in jenkins
+9.Goto manage jenkins and manage credentials then add credentials
+in that add generated sonarqube token from sonarqube server
+10.Then goto jenkins server manage jenkins click on configure system
+11.Goto sonarqube servers check environment variables
+12.given sonarqube 9.7.1 as name and url as http://223.30.222.245:9000/
+apply and save.
+13.Goto manage jenkins global tool configuration and install sonarqube scanner
+4.7.0 . name : sonarqubescanner 4.7.0
+14.Goto jenkins server and install github and maven integration plugins
+
+Quality gate configuration steps
+1.We can use existing quality gate sonar way as default or create new quality gate by click on create button.
+2.Click on create button and give name example as wilfred
+3.we can add conditions like bugs ,duplicate lines ,duplicate blocks for our own quality gate and map that project by clicking on projects
+4.Add quality gate pipeline script as last stage and run the project and wait for quality gate passed or failed condition.If quality gate is passed build will be sucess otherwise build will be failure
+
+
+set in jenkins JAVA_HOME=C:\Program Files\Java\jdk-11.0.16.1 in environment variables in configure system
