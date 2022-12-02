@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+	 tools {
+      maven 'maven 3.8.6'
+    }
+    environment {
+        //PATH = "C:/apache-maven-3.8.6/bin"
+		PATH = "C:/WINDOWS/SYSTEM32"
+    }
+    stages{
+      stage('GetCode'){
+            steps{
+                 git 'https://github.com/wilfred2021-web/dockeransiblejenkins.git'
+                 }
+            }
+       stage('Build'){
+            steps{
+                  bat 'mvn -X clean install'
+                 }
+              }
+        stage('SonarQube analysis'){
+            steps{
+            withSonarQubeEnv('sonarqube 8.9.10') {
+            bat 'mvn -X sonar:sonar'
+            }
+                 }
+        }
+        stage("Quality Gate") {
+            steps {
+              timeout(time: 1, unit: 'HOURS') {
+                waitForQualityGate abortPipeline: true
+              }
+            }
+        }
+		
+    }
+}		
